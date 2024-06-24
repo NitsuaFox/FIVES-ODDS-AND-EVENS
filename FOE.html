@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEO Game</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+        }
+        .game-container {
+            display: flex;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.1);
+        }
+        .game-board-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #game-board {
+            display: grid;
+            grid-template-columns: repeat(20, 30px);
+            grid-template-rows: repeat(20, 30px);
+            gap: 2px;
+            background-color: #fafafa;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.1);
+        }
+        .cell {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            cursor: pointer;
+            background-color: #fff;
+            transition: all 0.3s ease;
+            border-radius: 5px;
+        }
+        .cell.revealed { background-color: #dcdcdc; }
+        .cell.player1 { background-color: #1E90FF; color: white; }
+        .cell.cpu1 { background-color: #FF4500; color: white; }
+        .cell.available { box-shadow: 0 0 5px 2px #32CD32; }
+        .cell.temp-revealed { background-color: #FFFFE0; }
+        #status, #combo-info {
+            margin: 10px 0;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        .player-info {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .player-box {
+            border: 2px solid #333;
+            padding: 15px;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .player-box.active {
+            border-color: #32CD32;
+            background-color: #E0FFE0;
+            transform: scale(1.05);
+        }
+        .history-container {
+            width: 200px;
+            margin: 0 20px;
+        }
+        .history-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: #fff;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .history-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .history-item .number { font-weight: bold; }
+        .history-item .combo-info {
+            font-size: 0.9em;
+            display: flex;
+            gap: 5px;
+        }
+        .combo-badge {
+            padding: 3px 7px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .combo-badge.even { background-color: #d0ffd6; color: #006400; }
+        .combo-badge.odd { background-color: #ffe0e6; color: #8b008b; }
+        .combo-badge.fives { background-color: #d6eaff; color: #00008b; }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="history-container">
+            <h3>Player 1 History</h3>
+            <ul id="player1-history" class="history-list"></ul>
+        </div>
+        <div class="game-board-container">
+            <h1>TEO Game</h1>
+            <div id="game-board"></div>
+            <div id="status"></div>
+            <div id="combo-info"></div>
+            <div class="player-info">
+                <div id="player1-info" class="player-box"></div>
+                <div id="cpu1-info" class="player-box"></div>
+            </div>
+        </div>
+        <div class="history-container">
+            <h3>CPU History</h3>
+            <ul id="cpu1-history" class="history-list"></ul>
+        </div>
+    </div>
+    <script>
+        const GS=20,TC=GS*GS,RT=2000;
+        let gb=[],cp='PLAYER1',pc={PLAYER1:[],CPU1:[]},sc={PLAYER1:0,CPU1:0},cb={PLAYER1:[],CPU1:[]},sm={PLAYER1:1,CPU1:1},gp='START',ir=false;
+
+        function init(){
+            const ge=document.getElementById('game-board');
+            gb=Array.from({length:TC},(_,i)=>({v:i+1,r:false,o:null}));
+            for(let i=gb.length-1;i>0;i--){
+                const j=Math.floor(Math.random()*(i+1));
+                [gb[i],gb[j]]=[gb[j],gb[i]];
+            }
+            ge.innerHTML='';
+            gb.forEach((c,i)=>{
+                const ce=document.createElement('div');
+                ce.classList.add('cell');
+                ce.dataset.index=i;
+                ce.addEventListener('click',()=>handleCellClick(i));
+                ge.appendChild(ce);
+            });
+            updateStatus();
+            updatePlayerInfo();
+            highlightAvailableMoves();
+        }
+
+        function handleCellClick(i){
+            if(ir||cp!=='PLAYER1')return;
+            if(gp==='START'||isValidMove(i))makeMove(i);
+        }
+
+        function makeMove(i){
+            if(gb[i].r)return;
+            gb[i].r=true;
+            gb[i].o=cp;
+            pc[cp].push(i);
+            const ce=document.querySelector(`.cell[data-index="${i}"]`);
+            ce.textContent=gb[i].v;
+            ce.classList.add(cp.toLowerCase());
+            updateCombo(gb[i].v);
+            updateScore();
+            updateHistory(gb[i].v);
+            revealSurroundingNumbers(i);
+        }
+
+        function revealSurroundingNumbers(i){
+            ir=true;
+            const si=getSurroundingIndices(i);
+            si.forEach(i=>{
+                if(!gb[i].r){
+                    const c=document.querySelector(`.cell[data-index="${i}"]`);
+                    c.textContent=gb[i].v;
+                    c.classList.add('temp-revealed');
+                }
+            });
+            setTimeout(()=>{
+                si.forEach(i=>{
+                    if(!gb[i].r){
+                        const c=document.querySelector(`.cell[data-index="${i}"]`);
+                        c.textContent='';
+                        c.classList.remove('temp-revealed');
+                    }
+                });
+                ir=false;
+                switchPlayer();
+            },RT);
+        }
+
+        function switchPlayer(){
+            cp=cp==='PLAYER1'?'CPU1':'PLAYER1';
+            if(gp==='START'&&pc['CPU1'].length===1)gp='PLAY';
+            updateStatus();
+            updatePlayerInfo();
+            highlightAvailableMoves();
+            if(cp==='CPU1'){
+                setTimeout(makeCPUMove,500);
+            }
+        }
+
+        function isValidMove(i){
+            if(gb[i].r)return false;
+            return pc[cp].some(ci=>getSurroundingIndices(ci).includes(i));
+        }
+
+        function updateCombo(v){
+            const ie=v%2===0,if5=v%5===0;
+            let nc=[];
+            cb[cp].forEach(c=>{
+                if((c.t==='EVEN'&&ie)||(c.t==='ODD'&&!ie))nc.push({t:c.t,c:c.c+1});
+                if(c.t==='FIVES'&&if5)nc.push({t:'FIVES',c:c.c+1});
+            });
+            if(nc.length===0||(if5&&!nc.some(c=>c.t==='FIVES'))){
+                if(if5)nc.push({t:'FIVES',c:1});
+                if(ie)nc.push({t:'EVEN',c:1});
+                else nc.push({t:'ODD',c:1});
+            }
+            cb[cp]=nc;
+            updateScoreMultiplier();
+        }
+
+        function updateScoreMultiplier(){
+            sm[cp]=1+cb[cp].reduce((t,c)=>t+c.c*0.1,0);
+        }
+
+        function updateScore(){
+            sc[cp]+=Math.round(sm[cp]);
+        }
+
+        function updateHistory(v){
+            const hl=document.getElementById(`${cp.toLowerCase()}-history`);
+            const li=document.createElement('li');
+            li.classList.add('history-item');
+            const ns=document.createElement('span');
+            ns.classList.add('number');
+            ns.textContent=v;
+            const cis=document.createElement('span');
+            cis.classList.add('combo-info');
+            cb[cp].forEach(c=>{
+                const cb=document.createElement('span');
+                cb.classList.add('combo-badge',c.t.toLowerCase());
+                cb.textContent=`${c.c}x${c.t.charAt(0)}`;
+                cis.appendChild(cb);
+            });
+            li.appendChild(ns);
+            li.appendChild(cis);
+            hl.insertBefore(li,hl.firstChild);
+            if(hl.children.length>10)hl.removeChild(hl.lastChild);
+        }
+
+        function getSurroundingIndices(i){
+            const r=Math.floor(i/GS),c=i%GS;
+            return [i-GS-1,i-GS,i-GS+1,i-1,i+1,i+GS-1,i+GS,i+GS+1].filter((i,idx)=>{
+                const r2=Math.floor(i/GS),c2=i%GS;
+                return r2>=0&&r2<GS&&c2>=0&&c2<GS&&Math.abs(r2-r)<=1&&Math.abs(c2-c)<=1;
+            });
+        }
+
+        function highlightAvailableMoves(){
+            document.querySelectorAll('.cell').forEach(c=>c.classList.remove('available'));
+            if(gp==='START'){
+                document.querySelectorAll('.cell:not(.player1):not(.cpu1)').forEach(c=>c.classList.add('available'));
+            }else{
+                pc[cp].forEach(ci=>{
+                    getSurroundingIndices(ci).forEach(i=>{
+                        if(!gb[i].r)document.querySelector(`.cell[data-index="${i}"]`).classList.add('available');
+                    });
+                });
+            }
+        }
+
+        function makeCPUMove(){
+            let am=[];
+            if(gp==='START'){
+                am=gb.map((c,i)=>i).filter(i=>!gb[i].r);
+            }else{
+                pc['CPU1'].forEach(ci=>{
+                    getSurroundingIndices(ci).forEach(i=>{
+                        if(!gb[i].r)am.push(i);
+                    });
+                });
+            }
+            if(am.length>0){
+                const rm=am[Math.floor(Math.random()*am.length)];
+                makeMove(rm);
+            }else{
+                endGame();
+            }
+        }
+
+        function updatePlayerInfo(){
+            ['PLAYER1','CPU1'].forEach(p=>{
+                const ie=document.getElementById(`${p.toLowerCase()}-info`);
+                ie.textContent=`${p} - Score: ${sc[p]}, Multiplier: ${sm[p].toFixed(1)}x`;
+            });
+            document.getElementById('player1-info').classList.toggle('active',cp==='PLAYER1');
+            document.getElementById('cpu1-info').classList.toggle('active',cp==='CPU1');
+        }
+
+        function updateStatus(){
+            const se=document.getElementById('status');
+            se.textContent=gp==='START'?`${cp}: Choose your starting point`:`Current turn: ${cp}`;
+        }
+
+        function endGame(){
+            const winner=sc.PLAYER1>sc.CPU1?'PLAYER1':'CPU1';
+            alert(`Game Over! ${winner} wins with a score of ${sc[winner]}!`);
+        }
+
+        init();
+    </script>
+</body>
+</html>
