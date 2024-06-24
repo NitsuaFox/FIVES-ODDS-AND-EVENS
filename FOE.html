@@ -28,99 +28,12 @@
             box-shadow: 0 0 30px rgba(0,0,0,0.5);
             backdrop-filter: blur(10px);
         }
-        .game-board-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        #game-board {
-            display: grid;
-            gap: 2px;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
+        #three-canvas {
+            width: 600px;
+            height: 600px;
             border-radius: 10px;
-            box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
         }
-        .cell {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            cursor: pointer;
-            background: rgba(255, 255, 255, 0.3);
-            transition: all 0.3s ease;
-            border-radius: 5px;
-        }
-        .cell.revealed { background: rgba(220, 220, 220, 0.8); }
-        .cell.player1 { background: #1E90FF; color: white; }
-        .cell.cpu1 { background: #FF4500; color: white; }
-        .cell.available { box-shadow: 0 0 5px 2px #32CD32; }
-        .cell.temp-revealed { background: rgba(255, 255, 224, 0.8); }
-        #status, #combo-info {
-            margin: 10px 0;
-            font-size: 18px;
-            font-weight: bold;
-            color: #FFD700;
-        }
-        .player-info {
-            display: flex;
-            justify-content: space-around;
-            width: 100%;
-            margin-top: 20px;
-        }
-        .player-box {
-            flex: 1;
-            border: 2px solid #FFD700;
-            padding: 15px;
-            margin: 0 10px;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            transition: all 0.3s ease;
-        }
-        .player-box.active {
-            border-color: #32CD32;
-            background: rgba(224, 255, 224, 0.1);
-            transform: scale(1.05);
-        }
-        .history-container {
-            width: 200px;
-            margin: 0 20px;
-        }
-        .history-list {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
-            height: 400px;
-            overflow-y: auto;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-        }
-        .history-item {
-            padding: 10px 15px;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: #FFD700;
-        }
-        .history-item .number { font-weight: bold; }
-        .history-item .combo-info {
-            font-size: 0.9em;
-            display: flex;
-            gap: 5px;
-        }
-        .combo-badge {
-            padding: 3px 7px;
-            border-radius: 5px;
-            font-weight: bold;
-            color: #fff;
-        }
-        .combo-badge.even { background: #32CD32; }
-        .combo-badge.odd { background: #FF69B4; }
-        .combo-badge.fives { background: #1E90FF; }
         #grid-size-selection {
             display: flex;
             flex-direction: column;
@@ -156,6 +69,27 @@
         #start-game:hover {
             background: #28a745;
         }
+        .player-info {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .player-box {
+            flex: 1;
+            border: 2px solid #FFD700;
+            padding: 15px;
+            margin: 0 10px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+        }
+        .player-box.active {
+            border-color: #32CD32;
+            background: rgba(224, 255, 224, 0.1);
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body>
@@ -163,109 +97,133 @@
         <div id="grid-size-selection">
             <label for="grid-size">Select Grid Size:</label>
             <select id="grid-size">
-                <option value="10">10x10</option>
-                <option value="15">15x15</option>
-                <option value="20" selected>20x20</option>
-                <option value="25">25x25</option>
-                <option value="30">30x30</option>
+                <option value="5">5x5</option>
+                <option value="10" selected>10x10</option>
             </select>
             <button id="start-game">Start Game</button>
         </div>
+        <canvas id="three-canvas"></canvas>
         <div id="game-content" style="display: none;">
-            <div class="history-container">
-                <h3>Player 1 History</h3>
-                <ul id="player1-history" class="history-list"></ul>
-            </div>
-            <div class="game-board-container">
-                <h1>TEO Game</h1>
-                <div id="game-board"></div>
-                <div id="status"></div>
-                <div id="combo-info"></div>
-                <div class="player-info">
-                    <div id="player1-info" class="player-box"></div>
-                    <div id="cpu1-info" class="player-box"></div>
-                </div>
-            </div>
-            <div class="history-container">
-                <h3>CPU History</h3>
-                <ul id="cpu1-history" class="history-list"></ul>
+            <div class="player-info">
+                <div id="player1-info" class="player-box"></div>
+                <div id="cpu1-info" class="player-box"></div>
             </div>
         </div>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
-        let GS = 20;
-        let TC = GS * GS;
+        let GS = 10;
+        const TC = GS * GS;
         const RT = 2000;
         let gb = [], cp = 'PLAYER1', pc = {PLAYER1: [], CPU1: []}, sc = {PLAYER1: 0, CPU1: 0}, cb = {PLAYER1: [], CPU1: []}, sm = {PLAYER1: 1, CPU1: 1}, gp = 'START', ir = false;
 
         document.getElementById('start-game').addEventListener('click', () => {
             const gridSize = parseInt(document.getElementById('grid-size').value);
             GS = gridSize;
-            TC = GS * GS;
-            document.getElementById('grid-size-selection').style.display = 'none';
-            document.getElementById('game-content').style.display = 'flex';
-            init();
+            initThreeJS();
         });
 
-        function init(){
-            const ge = document.getElementById('game-board');
-            ge.style.gridTemplateColumns = `repeat(${GS}, 30px)`;
-            ge.style.gridTemplateRows = `repeat(${GS}, 30px)`;
-            gb = Array.from({length: TC}, (_, i) => ({v: i + 1, r: false, o: null}));
-            for(let i = gb.length - 1; i > 0; i--){
+        function initThreeJS() {
+            // Set up the scene, camera, and renderer
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ antialias: true, canvas: document.getElementById('three-canvas') });
+            renderer.setSize(600, 600);
+            renderer.setClearColor(0x000000, 1);
+
+            // Add lights
+            const light = new THREE.AmbientLight(0x404040); // soft white light
+            scene.add(light);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+            scene.add(directionalLight);
+
+            // Create the grid
+            const cellSize = 1;
+            const geometry = new THREE.BoxGeometry(cellSize, cellSize, cellSize);
+            const materials = {
+                empty: new THREE.MeshBasicMaterial({ color: 0xffffff }),
+                player1: new THREE.MeshBasicMaterial({ color: 0x1E90FF }),
+                cpu1: new THREE.MeshBasicMaterial({ color: 0xFF4500 })
+            };
+            const cells = [];
+
+            for (let x = 0; x < GS; x++) {
+                for (let z = 0; z < GS; z++) {
+                    const cube = new THREE.Mesh(geometry, materials.empty);
+                    cube.position.set(x - GS / 2, 0, z - GS / 2);
+                    scene.add(cube);
+                    cells.push(cube);
+                }
+            }
+
+            camera.position.set(0, GS, GS);
+            camera.lookAt(0, 0, 0);
+
+            function animate() {
+                requestAnimationFrame(animate);
+                renderer.render(scene, camera);
+            }
+
+            animate();
+
+            // Update game logic to use Three.js
+            gb = Array.from({ length: GS * GS }, (_, i) => ({ v: i + 1, r: false, o: null }));
+            for (let i = gb.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [gb[i], gb[j]] = [gb[j], gb[i]];
             }
-            ge.innerHTML = '';
-            gb.forEach((c, i) => {
-                const ce = document.createElement('div');
-                ce.classList.add('cell');
-                ce.dataset.index = i;
-                ce.style.width = `${30}px`;
-                ce.style.height = `${30}px`;
-                ce.addEventListener('click', () => handleCellClick(i));
-                ge.appendChild(ce);
+
+            // Add event listener for clicking on cells
+            renderer.domElement.addEventListener('click', (event) => {
+                const mouse = new THREE.Vector2();
+                mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
+                mouse.y = - (event.clientY / renderer.domElement.clientHeight) * 2 + 1;
+                const raycaster = new THREE.Raycaster();
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = raycaster.intersectObjects(cells);
+                if (intersects.length > 0) {
+                    const cellIndex = cells.indexOf(intersects[0].object);
+                    handleCellClick(cellIndex);
+                }
             });
+
             updateStatus();
             updatePlayerInfo();
             highlightAvailableMoves();
         }
 
-        function handleCellClick(i){
-            if(ir || cp !== 'PLAYER1') return;
-            if(gp === 'START' || isValidMove(i)) makeMove(i);
+        function handleCellClick(i) {
+            if (ir || cp !== 'PLAYER1') return;
+            if (gp === 'START' || isValidMove(i)) makeMove(i);
         }
 
-        function makeMove(i){
-            if(gb[i].r) return;
+        function makeMove(i) {
+            if (gb[i].r) return;
             gb[i].r = true;
             gb[i].o = cp;
             pc[cp].push(i);
-            const ce = document.querySelector(`.cell[data-index="${i}"]`);
-            ce.textContent = gb[i].v;
-            ce.classList.add(cp.toLowerCase());
+            const cell = cells[i];
+            cell.material = materials[cp.toLowerCase()];
             updateCombo(gb[i].v);
             updateScore();
             updateHistory(gb[i].v);
             revealSurroundingNumbers(i);
         }
 
-        function revealSurroundingNumbers(i){
+        function revealSurroundingNumbers(i) {
             ir = true;
             const si = getSurroundingIndices(i);
             si.forEach(i => {
-                if(!gb[i].r){
-                    const c = document.querySelector(`.cell[data-index="${i}"]`);
-                    c.textContent = gb[i].v;
-                    c.classList.add('temp-revealed');
+                if (!gb[i].r) {
+                    const cell = cells[i];
+                    cell.material = materials.tempRevealed;
                 }
             });
             setTimeout(() => {
                 si.forEach(i => {
-                    if(!gb[i].r){
-                        const c = document.querySelector(`.cell[data-index="${i}"]`);
-                        c.textContent = '';
-                        c.classList.remove('temp-revealed');
+                    if (!gb[i].r) {
+                        const cell = cells[i];
+                        cell.material = materials.empty;
                     }
                 });
                 ir = false;
@@ -273,47 +231,47 @@
             }, RT);
         }
 
-        function switchPlayer(){
+        function switchPlayer() {
             cp = cp === 'PLAYER1' ? 'CPU1' : 'PLAYER1';
-            if(gp === 'START' && pc['CPU1'].length === 1) gp = 'PLAY';
+            if (gp === 'START' && pc['CPU1'].length === 1) gp = 'PLAY';
             updateStatus();
             updatePlayerInfo();
             highlightAvailableMoves();
-            if(cp === 'CPU1'){
+            if (cp === 'CPU1') {
                 setTimeout(makeCPUMove, 500);
             }
         }
 
-        function isValidMove(i){
-            if(gb[i].r) return false;
+        function isValidMove(i) {
+            if (gb[i].r) return false;
             return pc[cp].some(ci => getSurroundingIndices(ci).includes(i));
         }
 
-        function updateCombo(v){
+        function updateCombo(v) {
             const ie = v % 2 === 0, if5 = v % 5 === 0;
             let nc = [];
             cb[cp].forEach(c => {
-                if((c.t === 'EVEN' && ie) || (c.t === 'ODD' && !ie)) nc.push({t: c.t, c: c.c + 1});
-                if(c.t === 'FIVES' && if5) nc.push({t: 'FIVES', c: c.c + 1});
+                if ((c.t === 'EVEN' && ie) || (c.t === 'ODD' && !ie)) nc.push({ t: c.t, c: c.c + 1 });
+                if (c.t === 'FIVES' && if5) nc.push({ t: 'FIVES', c: c.c + 1 });
             });
-            if(nc.length === 0 || (if5 && !nc.some(c => c.t === 'FIVES'))){
-                if(if5) nc.push({t: 'FIVES', c: 1});
-                if(ie) nc.push({t: 'EVEN', c: 1});
-                else nc.push({t: 'ODD', c: 1});
+            if (nc.length === 0 || (if5 && !nc.some(c => c.t === 'FIVES'))) {
+                if (if5) nc.push({ t: 'FIVES', c: 1 });
+                if (ie) nc.push({ t: 'EVEN', c: 1 });
+                else nc.push({ t: 'ODD', c: 1 });
             }
             cb[cp] = nc;
             updateScoreMultiplier();
         }
 
-        function updateScoreMultiplier(){
+        function updateScoreMultiplier() {
             sm[cp] = 1 + cb[cp].reduce((t, c) => t + c.c * 0.1, 0);
         }
 
-        function updateScore(){
+        function updateScore() {
             sc[cp] += Math.round(sm[cp]);
         }
 
-        function updateHistory(v){
+        function updateHistory(v) {
             const hl = document.getElementById(`${cp.toLowerCase()}-history`);
             const li = document.createElement('li');
             li.classList.add('history-item');
@@ -331,10 +289,10 @@
             li.appendChild(ns);
             li.appendChild(cis);
             hl.insertBefore(li, hl.firstChild);
-            if(hl.children.length > 10) hl.removeChild(hl.lastChild);
+            if (hl.children.length > 10) hl.removeChild(hl.lastChild);
         }
 
-        function getSurroundingIndices(i){
+        function getSurroundingIndices(i) {
             const r = Math.floor(i / GS), c = i % GS;
             return [i - GS - 1, i - GS, i - GS + 1, i - 1, i + 1, i + GS - 1, i + GS, i + GS + 1].filter((i, idx) => {
                 const r2 = Math.floor(i / GS), c2 = i % GS;
@@ -342,31 +300,35 @@
             });
         }
 
-        function highlightAvailableMoves(){
-            document.querySelectorAll('.cell').forEach(c => c.classList.remove('available'));
-            if(gp === 'START'){
-                document.querySelectorAll('.cell:not(.player1):not(.cpu1)').forEach(c => c.classList.add('available'));
+        function highlightAvailableMoves() {
+            cells.forEach(c => c.material = materials.empty);
+            if (gp === 'START') {
+                cells.forEach(c => {
+                    if (!c.material === materials.player1 && !c.material === materials.cpu1) {
+                        c.material = materials.available;
+                    }
+                });
             } else {
                 pc[cp].forEach(ci => {
                     getSurroundingIndices(ci).forEach(i => {
-                        if(!gb[i].r) document.querySelector(`.cell[data-index="${i}"]`).classList.add('available');
+                        if (!gb[i].r) cells[i].material = materials.available;
                     });
                 });
             }
         }
 
-        function makeCPUMove(){
+        function makeCPUMove() {
             let am = [];
-            if(gp === 'START'){
+            if (gp === 'START') {
                 am = gb.map((c, i) => i).filter(i => !gb[i].r);
             } else {
                 pc['CPU1'].forEach(ci => {
                     getSurroundingIndices(ci).forEach(i => {
-                        if(!gb[i].r) am.push(i);
+                        if (!gb[i].r) am.push(i);
                     });
                 });
             }
-            if(am.length > 0){
+            if (am.length > 0) {
                 const rm = am[Math.floor(Math.random() * am.length)];
                 makeMove(rm);
             } else {
@@ -374,7 +336,7 @@
             }
         }
 
-        function updatePlayerInfo(){
+        function updatePlayerInfo() {
             ['PLAYER1', 'CPU1'].forEach(p => {
                 const ie = document.getElementById(`${p.toLowerCase()}-info`);
                 ie.textContent = `${p} - Score: ${sc[p]}, Multiplier: ${sm[p].toFixed(1)}x`;
@@ -383,16 +345,15 @@
             document.getElementById('cpu1-info').classList.toggle('active', cp === 'CPU1');
         }
 
-        function updateStatus(){
+        function updateStatus() {
             const se = document.getElementById('status');
             se.textContent = gp === 'START' ? `${cp}: Choose your starting point` : `Current turn: ${cp}`;
         }
 
-        function endGame(){
+        function endGame() {
             const winner = sc.PLAYER1 > sc.CPU1 ? 'PLAYER1' : 'CPU1';
             alert(`Game Over! ${winner} wins with a score of ${sc[winner]}!`);
         }
-
     </script>
 </body>
 </html>
