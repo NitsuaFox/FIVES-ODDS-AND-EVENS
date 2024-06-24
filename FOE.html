@@ -5,21 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TEO Game</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
         body {
-            font-family: 'Roboto', sans-serif;
+            font-family: 'Press Start 2P', cursive;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: #fff;
+            overflow: hidden;
         }
         .game-container {
             display: flex;
             padding: 20px;
-            background-color: #fff;
+            background: rgba(0, 0, 0, 0.7);
             border-radius: 15px;
-            box-shadow: 0 0 30px rgba(0,0,0,0.1);
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
         }
         .game-board-container {
             display: flex;
@@ -31,10 +36,10 @@
             grid-template-columns: repeat(20, 30px);
             grid-template-rows: repeat(20, 30px);
             gap: 2px;
-            background-color: #fafafa;
+            background: rgba(255, 255, 255, 0.1);
             padding: 15px;
             border-radius: 10px;
-            box-shadow: inset 0 0 15px rgba(0,0,0,0.1);
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
         }
         .cell {
             width: 30px;
@@ -44,20 +49,20 @@
             justify-content: center;
             font-size: 14px;
             cursor: pointer;
-            background-color: #fff;
+            background: rgba(255, 255, 255, 0.3);
             transition: all 0.3s ease;
             border-radius: 5px;
         }
-        .cell.revealed { background-color: #dcdcdc; }
-        .cell.player1 { background-color: #1E90FF; color: white; }
-        .cell.cpu1 { background-color: #FF4500; color: white; }
+        .cell.revealed { background: rgba(220, 220, 220, 0.8); }
+        .cell.player1 { background: #1E90FF; color: white; }
+        .cell.cpu1 { background: #FF4500; color: white; }
         .cell.available { box-shadow: 0 0 5px 2px #32CD32; }
-        .cell.temp-revealed { background-color: #FFFFE0; }
+        .cell.temp-revealed { background: rgba(255, 255, 224, 0.8); }
         #status, #combo-info {
             margin: 10px 0;
             font-size: 18px;
             font-weight: bold;
-            color: #333;
+            color: #FFD700;
         }
         .player-info {
             display: flex;
@@ -66,16 +71,16 @@
             margin-top: 20px;
         }
         .player-box {
-            border: 2px solid #333;
+            border: 2px solid #FFD700;
             padding: 15px;
             border-radius: 10px;
-            background-color: #f9f9f9;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
             transition: all 0.3s ease;
         }
         .player-box.active {
             border-color: #32CD32;
-            background-color: #E0FFE0;
+            background: rgba(224, 255, 224, 0.1);
             transform: scale(1.05);
         }
         .history-container {
@@ -90,8 +95,8 @@
             overflow-y: auto;
             border: 1px solid #ccc;
             border-radius: 10px;
-            background-color: #fff;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
         .history-item {
             padding: 10px 15px;
@@ -99,6 +104,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            color: #FFD700;
         }
         .history-item .number { font-weight: bold; }
         .history-item .combo-info {
@@ -110,10 +116,11 @@
             padding: 3px 7px;
             border-radius: 5px;
             font-weight: bold;
+            color: #fff;
         }
-        .combo-badge.even { background-color: #d0ffd6; color: #006400; }
-        .combo-badge.odd { background-color: #ffe0e6; color: #8b008b; }
-        .combo-badge.fives { background-color: #d6eaff; color: #00008b; }
+        .combo-badge.even { background: #32CD32; }
+        .combo-badge.odd { background: #FF69B4; }
+        .combo-badge.fives { background: #1E90FF; }
     </style>
 </head>
 <body>
