@@ -163,11 +163,8 @@
         <div id="grid-size-selection">
             <label for="grid-size">Select Grid Size:</label>
             <select id="grid-size">
-                <option value="10">10x10</option>
-                <option value="15">15x15</option>
-                <option value="20" selected>20x20</option>
-                <option value="25">25x25</option>
-                <option value="30">30x30</option>
+                <option value="5">5x5</option>
+                <option value="10" selected>10x10</option>
             </select>
             <button id="start-game">Start Game</button>
         </div>
@@ -193,7 +190,7 @@
         </div>
     </div>
     <script>
-        let GS = 20;
+        let GS = 10;
         let TC = GS * GS;
         const RT = 2000;
         let gb = [], cp = 'PLAYER1', pc = {PLAYER1: [], CPU1: []}, sc = {PLAYER1: 0, CPU1: 0}, cb = {PLAYER1: [], CPU1: []}, sm = {PLAYER1: 1, CPU1: 1}, gp = 'START', ir = false;
