@@ -5,192 +5,190 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FOE Game</title>
 <style>
-    body {
-        font-family: 'Arial', sans-serif;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        margin: 0;
-        background-color: #f0f0f0;
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
+}
+.game-container {
+    max-width: 500px;
+    padding: 20px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+h1 {
+    text-align: center;
+}
+.grid {
+    display: grid;
+    gap: 5px;
+    margin-bottom: 20px;
+}
+.cell {
+    aspect-ratio: 1/1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    cursor: pointer;
+    background-color: #e0e0e0;
+    transition: background-color 0.3s;
+}
+.cell.revealed-player1 {
+    background-color: #3498db;
+    color: white;
+}
+.cell.revealed-cpu1 {
+    background-color: #e67e22;
+    color: white;
+}
+.cell.valid-move {
+    border: 2px solid #2ecc71;
+}
+.cell.temp-revealed {
+    background-color: #f1c40f;
+}
+.player-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+.player-box {
+    padding: 10px;
+    border-radius: 5px;
+    width: 48%;
+}
+.player-box.active {
+    background-color: #e8f8e8;
+}
+.combo-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.combo-bar {
+    height: 20px;
+    background-color: #ecf0f1;
+    border-radius: 10px;
+    overflow: hidden;
+}
+.combo-bar-fill {
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s ease-in-out, background-color 0.3s ease-in-out;
+}
+.combo-bar-fill.five {
+    background-color: #e74c3c;
+}
+.combo-bar-fill.odd {
+    background-color: #3498db;
+}
+.combo-bar-fill.even {
+    background-color: #2ecc71;
+}
+.combo-bar-fill.maxed {
+    background-color: gold !important;
+}
+@keyframes flash {
+    0%, 100% {
+        opacity: 1;
     }
-    .game-container {
-        max-width: 90vw;
-        padding: 20px;
-        background-color: #fff;
-        border-radius: 10px;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    50% {
+        opacity: 0.5;
     }
-    h1 {
-        text-align: center;
-        margin-bottom: 20px;
-    }
-    .grid {
-        display: grid;
-        gap: 5px;
-        margin-bottom: 20px;
-        overflow: hidden; /* Ensure grid does not overflow on small screens */
-    }
-    .cell {
-        aspect-ratio: 1/1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        cursor: pointer;
-        background-color: #e0e0e0;
-        transition: background-color 0.3s;
-    }
-    .cell.revealed-player1 {
-        background-color: #3498db;
-        color: white;
-    }
-    .cell.revealed-cpu1 {
-        background-color: #e67e22;
-        color: white;
-    }
-    .cell.temp-revealed {
-        background-color: #f1c40f;
-    }
-    .cell.valid-move {
-        border: 2px solid #2ecc71;
-    }
-    .player-info {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 20px;
-    }
-    .player-box {
-        padding: 10px;
-        border-radius: 5px;
-        width: 48%;
-        background-color: #f9f9f9;
-    }
-    .player-box.active {
-        background-color: #e8f8e8;
-    }
-    .combo-bars {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-    }
-    .combo-bar {
-        height: 20px;
-        background-color: #ecf0f1;
-        border-radius: 10px;
-        overflow: hidden;
-    }
-    .combo-bar-fill {
-        height: 100%;
-        width: 0%;
-        transition: width 0.3s ease-in-out, background-color 0.3s ease-in-out;
-    }
-    .combo-bar-fill.five {
-        background-color: #e74c3c;
-    }
-    .combo-bar-fill.odd {
-        background-color: #3498db;
-    }
-    .combo-bar-fill.even {
-        background-color: #2ecc71;
-    }
-    .combo-bar-fill.maxed {
-        background-color: gold !important;
-    }
-    @keyframes flash {
-        0%, 100% {
-            opacity: 1;
-        }
-        50% {
-            opacity: 0.5;
-        }
-    }
-    .combo-bar-fill.flashing {
-        animation: flash 0.5s linear infinite;
-    }
-    button {
-        display: block;
-        width: 100%;
-        padding: 10px;
-        margin-top: 10px;
-        background-color: #2ecc71;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background-color 0.3s;
-    }
-    button:hover {
-        background-color: #27ae60;
-    }
-    select {
-        width: 100%;
-        padding: 10px;
-        margin-bottom: 10px;
-    }
-    .game-over-dialog {
-        display: none;
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background-color: white;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 0 10px rgba(0,0,0,0.3);
-        text-align: center;
-        z-index: 1000;
-    }
+}
+.combo-bar-fill.flashing {
+    animation: flash 0.5s linear infinite;
+}
+button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    background-color: #2ecc71;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+.game-over-dialog {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    text-align: center;
+    z-index: 1000;
+}
+.game-over-dialog h2 {
+    margin-top: 0;
+}
 </style>
 </head>
 <body>
 <div class="game-container">
-<h1>FOE Game</h1>
-<div id="game-start">
-<label for="grid-size">Select Grid Size:</label>
-<select id="grid-size">
-<option value="5">5x5</option>
-<option value="10" selected>10x10</option>
-</select>
-<button id="start-game">Start Game</button>
-</div>
-<div id="game-play" style="display:none;">
-<div class="player-info">
-<div id="player1-info" class="player-box">
-<h2>PLAYER1</h2>
-<p>Score: <span id="player1-score">0</span></p>
-<p>Multiplier: <span id="player1-multiplier">1</span>x</p>
-<div class="combo-bars">
-<div class="combo-bar"><div id="player1-five" class="combo-bar-fill five"></div></div>
-<div class="combo-bar"><div id="player1-odd" class="combo-bar-fill odd"></div></div>
-<div class="combo-bar"><div id="player1-even" class="combo-bar-fill even"></div></div>
-</div>
-</div>
-<div id="cpu1-info" class="player-box">
-<h2>CPU1</h2>
-<p>Score: <span id="cpu1-score">0</span></p>
-<p>Multiplier: <span id="cpu1-multiplier">1</span>x</p>
-<div class="combo-bars">
-<div class="combo-bar"><div id="cpu1-five" class="combo-bar-fill five"></div></div>
-<div class="combo-bar"><div id="cpu1-odd" class="combo-bar-fill odd"></div></div>
-<div class="combo-bar"><div id="cpu1-even" class="combo-bar-fill even"></div></div>
-</div>
-</div>
-</div>
-<div id="grid" class="grid"></div>
-<div id="current-player"></div>
-<button id="reset-game">Reset Game</button>
-</div>
+    <h1>FOE Game</h1>
+    <div id="game-start">
+        <label for="grid-size">Select Grid Size:</label>
+        <select id="grid-size">
+            <option value="5">5x5</option>
+            <option value="10">10x10</option>
+        </select>
+        <button id="start-game">Start Game</button>
+    </div>
+    <div id="game-play" style="display:none;">
+        <div class="player-info">
+            <div id="player1-info" class="player-box">
+                <h2>PLAYER1</h2>
+                <p>Score: <span id="player1-score">0</span></p>
+                <p>Multiplier: <span id="player1-multiplier">1</span>x</p>
+                <div class="combo-bars">
+                    <div class="combo-bar"><div id="player1-five" class="combo-bar-fill five"></div></div>
+                    <div class="combo-bar"><div id="player1-odd" class="combo-bar-fill odd"></div></div>
+                    <div class="combo-bar"><div id="player1-even" class="combo-bar-fill even"></div></div>
+                </div>
+            </div>
+            <div id="cpu1-info" class="player-box">
+                <h2>CPU1</h2>
+                <p>Score: <span id="cpu1-score">0</span></p>
+                <p>Multiplier: <span id="cpu1-multiplier">1</span>x</p>
+                <div class="combo-bars">
+                    <div class="combo-bar"><div id="cpu1-five" class="combo-bar-fill five"></div></div>
+                    <div class="combo-bar"><div id="cpu1-odd" class="combo-bar-fill odd"></div></div>
+                    <div class="combo-bar"><div id="cpu1-even" class="combo-bar-fill even"></div></div>
+                </div>
+            </div>
+        </div>
+        <div id="grid" class="grid"></div>
+        <div id="current-player"></div>
+        <button id="reset-game">Reset Game</button>
+    </div>
 </div>
 <div id="game-over-dialog" class="game-over-dialog">
-<h2>Game Over!</h2>
-<p id="winner-text"></p>
-<p>Final Scores:</p>
-<p>PLAYER1: <span id="final-score-player1"></span></p>
-<p>CPU1: <span id="final-score-cpu1"></span></p>
-<button id="restart-game">Play Again</button>
+    <h2>Game Over!</h2>
+    <p id="winner-text"></p>
+    <p>Final Scores:</p>
+    <p>PLAYER1: <span id="final-score-player1"></span></p>
+    <p>CPU1: <span id="final-score-cpu1"></span></p>
+    <button id="restart-game">Play Again</button>
 </div>
 <script>
+// JavaScript for FOE Game
+
 const REVEAL_TIME = 2000;
 const MAX_COMBO = 10;
 
@@ -220,21 +218,34 @@ let fiveMultipliers = {
 };
 let isRevealing = false;
 
-function initializeGame() {
-    const numCells = gridSize * gridSize;
-    grid = Array.from({ length: numCells }, (cell, index) => ({
-        value: index + 1,
-        revealed: false,
-        owner: null,
-        tempRevealed: false
-    }));
+document.getElementById('start-game').addEventListener('click', () => {
+    gridSize = parseInt(document.getElementById('grid-size').value, 10);
+    initializeGame();
+    document.getElementById('game-start').style.display = 'none';
+    document.getElementById('game-play').style.display = 'block';
+});
 
-    // Shuffle grid
-    for (let i = grid.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [grid[i], grid[j]] = [grid[j], grid[i]];
+document.getElementById('reset-game').addEventListener('click', () => {
+    document.getElementById('game-start').style.display = 'block';
+    document.getElementById('game-play').style.display = 'none';
+    document.getElementById('game-over-dialog').style.display = 'none';
+    gameState = 'START';
+});
+
+function initializeGame() {
+    grid = [];
+    const totalCells = gridSize * gridSize;
+
+    for (let i = 1; i <= totalCells; i++) {
+        grid.push({
+            value: i,
+            revealed: false,
+            owner: null,
+            tempRevealed: false
+        });
     }
 
+    shuffleGrid();
     currentPlayer = 'PLAYER1';
     playerCells = {
         PLAYER1: [],
@@ -257,26 +268,32 @@ function initializeGame() {
         CPU1: 1
     };
     gameState = 'PLAYING';
-
     renderGame();
+}
+
+function shuffleGrid() {
+    for (let i = grid.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [grid[i], grid[j]] = [grid[j], grid[i]];
+    }
 }
 
 function renderGame() {
     const gridElement = document.getElementById('grid');
-    gridElement.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
     gridElement.innerHTML = '';
+    gridElement.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
 
     grid.forEach((cell, index) => {
         const cellElement = document.createElement('div');
         cellElement.className = 'cell';
-
+        
         if (cell.revealed) {
             cellElement.classList.add(`revealed-${cell.owner.toLowerCase()}`);
             cellElement.textContent = cell.value;
         } else if (cell.tempRevealed) {
             cellElement.classList.add('temp-revealed');
             cellElement.textContent = cell.value;
-        } else if (isValidMove(index) && currentPlayer === 'PLAYER1' && gameState === 'PLAYING') {
+        } else if (isValidMove(index)) {
             cellElement.classList.add('valid-move');
         }
 
@@ -415,21 +432,7 @@ function cpuMove() {
     }
 }
 
-document.getElementById('start-game').addEventListener('click', () => {
-    gridSize = parseInt(document.getElementById('grid-size').value, 10);
-    initializeGame();
-    document.getElementById('game-start').style.display = 'none';
-    document.getElementById('game-play').style.display = 'block';
-});
-
-document.getElementById('reset-game').addEventListener('click', () => {
-    document.getElementById('game-start').style.display = 'block';
-    document.getElementById('game-play').style.display = 'none';
-    document.getElementById('game-over-dialog').style.display = 'none';
-    gameState = 'START';
-});
-
-initializeGame();
+initializeGame(); // Start the game immediately on page load
 </script>
 </body>
 </html>
