@@ -5,434 +5,58 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FOE Game</title>
 <style>
-body {
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    background-color: #f0f0f0;
-}
-.game-container {
-    max-width: 500px;
-    padding: 20px;
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
-h1 {
-    text-align: center;
-}
-.grid {
-    display: grid;
-    gap: 5px;
-    margin-bottom: 20px;
-}
-.cell {
-    aspect-ratio: 1/1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    cursor: pointer;
-    background-color: #e0e0e0;
-    transition: background-color 0.3s;
-}
-.cell.revealed-player1 {
-    background-color: #3498db;
-    color: white;
-}
-.cell.revealed-cpu1 {
-    background-color: #e67e22;
-    color: white;
-}
-.cell.valid-move {
-    border: 2px solid #2ecc71;
-}
-.cell.temp-revealed {
-    background-color: #f1c40f;
-}
-.player-info {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-}
-.player-box {
-    padding: 10px;
-    border-radius: 5px;
-    width: 48%;
-}
-.player-box.active {
-    background-color: #e8f8e8;
-}
-.combo-bars {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-.combo-bar {
-    height: 20px;
-    background-color: #ecf0f1;
-    border-radius: 10px;
-    overflow: hidden;
-}
-.combo-bar-fill {
-    height: 100%;
-    width: 0%;
-    transition: width 0.3s ease-in-out, background-color 0.3s ease-in-out;
-}
-.combo-bar-fill.five {
-    background-color: #e74c3c;
-}
-.combo-bar-fill.odd {
-    background-color: #3498db;
-}
-.combo-bar-fill.even {
-    background-color: #2ecc71;
-}
-.combo-bar-fill.maxed {
-    background-color: gold !important;
-}
-@keyframes flash {
-    0%, 100% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.5;
-    }
-}
-.combo-bar-fill.flashing {
-    animation: flash 0.5s linear infinite;
-}
-button {
-    display: block;
-    width: 100%;
-    padding: 10px;
-    margin-top: 10px;
-    background-color: #2ecc71;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-select {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-}
-.game-over-dialog {
-    display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.3);
-    text-align: center;
-    z-index: 1000;
-}
-.game-over-dialog h2 {
-    margin-top: 0;
-}
+body{font-family:Arial,sans-serif;display:flex;justify-content:center;align-items:center;height:100vh;margin:0;background-color:#f0f0f0}.game-container{max-width:500px;padding:20px;background-color:white;border-radius:10px;box-shadow:0 0 10px rgba(0,0,0,0.1)}h1{text-align:center}.grid{display:grid;gap:5px;margin-bottom:20px}.cell{aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;font-weight:bold;cursor:pointer;background-color:#e0e0e0;transition:background-color .3s}.cell.revealed-player1{background-color:#3498db;color:white}.cell.revealed-cpu1{background-color:#e67e22;color:white}.cell.valid-move{border:2px solid #2ecc71}.cell.temp-revealed{background-color:#f1c40f}.player-info{display:flex;justify-content:space-between;margin-bottom:20px}.player-box{padding:10px;border-radius:5px;width:48%}.player-box.active{background-color:#e8f8e8}.combo-bars{display:flex;flex-direction:column;gap:5px}.combo-bar{height:20px;background-color:#ecf0f1;border-radius:10px;overflow:hidden}.combo-bar-fill{height:100%;width:0%;transition:width .3s ease-in-out,background-color .3s ease-in-out}.combo-bar-fill.five{background-color:#e74c3c}.combo-bar-fill.odd{background-color:#3498db}.combo-bar-fill.even{background-color:#2ecc71}.combo-bar-fill.maxed{background-color:gold!important}@keyframes flash{0%,100%{opacity:1}50%{opacity:0.5}}.combo-bar-fill.flashing{animation:flash 0.5s linear infinite}button{display:block;width:100%;padding:10px;margin-top:10px;background-color:#2ecc71;color:white;border:none;border-radius:5px;cursor:pointer}select{width:100%;padding:10px;margin-bottom:10px}.game-over-dialog{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background-color:white;padding:20px;border-radius:10px;box-shadow:0 0 10px rgba(0,0,0,0.3);text-align:center;z-index:1000}.game-over-dialog h2{margin-top:0}
 </style>
 </head>
 <body>
 <div class="game-container">
-    <h1>FOE Game MF</h1>
-    <div id="game-start">
-        <label for="grid-size">Select Grid Size:</label>
-        <select id="grid-size">
-            <option value="5">5x5</option>
-            <option value="10">10x10</option>
-        </select>
-        <button id="start-game">Start Game</button>
-    </div>
-    <div id="game-play" style="display:none;">
-        <div class="player-info">
-            <div id="player1-info" class="player-box">
-                <h2>PLAYER1</h2>
-                <p>Score: <span id="player1-score">0</span></p>
-                <p>Multiplier: <span id="player1-multiplier">1</span>x</p>
-                <div class="combo-bars">
-                    <div class="combo-bar"><div id="player1-five" class="combo-bar-fill five"></div></div>
-                    <div class="combo-bar"><div id="player1-odd" class="combo-bar-fill odd"></div></div>
-                    <div class="combo-bar"><div id="player1-even" class="combo-bar-fill even"></div></div>
-                </div>
-            </div>
-            <div id="cpu1-info" class="player-box">
-                <h2>CPU1</h2>
-                <p>Score: <span id="cpu1-score">0</span></p>
-                <p>Multiplier: <span id="cpu1-multiplier">1</span>x</p>
-                <div class="combo-bars">
-                    <div class="combo-bar"><div id="cpu1-five" class="combo-bar-fill five"></div></div>
-                    <div class="combo-bar"><div id="cpu1-odd" class="combo-bar-fill odd"></div></div>
-                    <div class="combo-bar"><div id="cpu1-even" class="combo-bar-fill even"></div></div>
-                </div>
-            </div>
-        </div>
-        <div id="grid" class="grid"></div>
-        <div id="current-player"></div>
-        <button id="reset-game">Reset Game</button>
-    </div>
+<h1>FOE Game</h1>
+<div id="game-start">
+<label for="grid-size">Select Grid Size:</label>
+<select id="grid-size">
+<option value="5">5x5</option>
+<option value="10">10x10</option>
+</select>
+<button id="start-game">Start Game</button>
+</div>
+<div id="game-play" style="display:none;">
+<div class="player-info">
+<div id="player1-info" class="player-box">
+<h2>PLAYER1</h2>
+<p>Score: <span id="player1-score">0</span></p>
+<p>Multiplier: <span id="player1-multiplier">1</span>x</p>
+<div class="combo-bars">
+<div class="combo-bar"><div id="player1-five" class="combo-bar-fill five"></div></div>
+<div class="combo-bar"><div id="player1-odd" class="combo-bar-fill odd"></div></div>
+<div class="combo-bar"><div id="player1-even" class="combo-bar-fill even"></div></div>
+</div>
+</div>
+<div id="cpu1-info" class="player-box">
+<h2>CPU1</h2>
+<p>Score: <span id="cpu1-score">0</span></p>
+<p>Multiplier: <span id="cpu1-multiplier">1</span>x</p>
+<div class="combo-bars">
+<div class="combo-bar"><div id="cpu1-five" class="combo-bar-fill five"></div></div>
+<div class="combo-bar"><div id="cpu1-odd" class="combo-bar-fill odd"></div></div>
+<div class="combo-bar"><div id="cpu1-even" class="combo-bar-fill even"></div></div>
+</div>
+</div>
+</div>
+<div id="grid" class="grid"></div>
+<div id="current-player"></div>
+<button id="reset-game">Reset Game</button>
+</div>
 </div>
 <div id="game-over-dialog" class="game-over-dialog">
-    <h2>Game Over!</h2>
-    <p id="winner-text"></p>
-    <p>Final Scores:</p>
-    <p>PLAYER1: <span id="final-score-player1"></span></p>
-    <p>CPU1: <span id="final-score-cpu1"></span></p>
-    <button id="restart-game">Play Again</button>
+<h2>Game Over!</h2>
+<p id="winner-text"></p>
+<p>Final Scores:</p>
+<p>PLAYER1: <span id="final-score-player1"></span></p>
+<p>CPU1: <span id="final-score-cpu1"></span></p>
+<button id="restart-game">Play Again</button>
 </div>
 <script>
-// JavaScript for FOE Game
-
-const REVEAL_TIME = 2000;
-const MAX_COMBO = 10;
-
-let gameState = 'START';
-let gridSize = 10;
-let grid = [];
-let currentPlayer = 'PLAYER1';
-let playerCells = {
-    PLAYER1: [],
-    CPU1: []
-};
-let scores = {
-    PLAYER1: 0,
-    CPU1: 0
-};
-let combos = {
-    PLAYER1: [],
-    CPU1: []
-};
-let scoreMultipliers = {
-    PLAYER1: 1,
-    CPU1: 1
-};
-let fiveMultipliers = {
-    PLAYER1: 1,
-    CPU1: 1
-};
-let isRevealing = false;
-
-document.getElementById('start-game').addEventListener('click', () => {
-    gridSize = parseInt(document.getElementById('grid-size').value, 10);
-    initializeGame();
-    document.getElementById('game-start').style.display = 'none';
-    document.getElementById('game-play').style.display = 'block';
-});
-
-document.getElementById('reset-game').addEventListener('click', () => {
-    document.getElementById('game-start').style.display = 'block';
-    document.getElementById('game-play').style.display = 'none';
-    document.getElementById('game-over-dialog').style.display = 'none';
-    gameState = 'START';
-});
-
-function initializeGame() {
-    grid = [];
-    const totalCells = gridSize * gridSize;
-
-    for (let i = 1; i <= totalCells; i++) {
-        grid.push({
-            value: i,
-            revealed: false,
-            owner: null,
-            tempRevealed: false
-        });
-    }
-
-    shuffleGrid();
-    currentPlayer = 'PLAYER1';
-    playerCells = {
-        PLAYER1: [],
-        CPU1: []
-    };
-    scores = {
-        PLAYER1: 0,
-        CPU1: 0
-    };
-    combos = {
-        PLAYER1: [],
-        CPU1: []
-    };
-    scoreMultipliers = {
-        PLAYER1: 1,
-        CPU1: 1
-    };
-    fiveMultipliers = {
-        PLAYER1: 1,
-        CPU1: 1
-    };
-    gameState = 'PLAYING';
-    renderGame();
-}
-
-function shuffleGrid() {
-    for (let i = grid.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [grid[i], grid[j]] = [grid[j], grid[i]];
-    }
-}
-
-function renderGame() {
-    const gridElement = document.getElementById('grid');
-    gridElement.innerHTML = '';
-    gridElement.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
-
-    grid.forEach((cell, index) => {
-        const cellElement = document.createElement('div');
-        cellElement.className = 'cell';
-        
-        if (cell.revealed) {
-            cellElement.classList.add(`revealed-${cell.owner.toLowerCase()}`);
-            cellElement.textContent = cell.value;
-        } else if (cell.tempRevealed) {
-            cellElement.classList.add('temp-revealed');
-            cellElement.textContent = cell.value;
-        } else if (isValidMove(index)) {
-            cellElement.classList.add('valid-move');
-        }
-
-        cellElement.addEventListener('click', () => {
-            if (!isRevealing && isValidMove(index) && gameState === 'PLAYING') {
-                revealCell(index);
-            }
-        });
-
-        gridElement.appendChild(cellElement);
-    });
-
-    updatePlayerInfo();
-    updateCurrentPlayer();
-    checkGameOver();
-}
-
-function updatePlayerInfo() {
-    document.getElementById('player1-score').textContent = scores.PLAYER1;
-    document.getElementById('player1-multiplier').textContent = scoreMultipliers.PLAYER1;
-    updateComboBars('player1');
-
-    document.getElementById('cpu1-score').textContent = scores.CPU1;
-    document.getElementById('cpu1-multiplier').textContent = scoreMultipliers.CPU1;
-    updateComboBars('cpu1');
-}
-
-function updateComboBars(player) {
-    const comboTypes = ['five', 'odd', 'even'];
-
-    comboTypes.forEach(type => {
-        const comboBar = document.getElementById(`${player}-${type}`);
-        const currentCombo = combos[player].filter(combo => combo.type === type).length;
-        const maxedCombo = currentCombo >= MAX_COMBO;
-        comboBar.style.width = `${(currentCombo / MAX_COMBO) * 100}%`;
-        comboBar.classList.toggle('maxed', maxedCombo);
-        comboBar.classList.toggle('flashing', maxedCombo && gameState === 'PLAYING');
-    });
-}
-
-function updateCurrentPlayer() {
-    document.getElementById('current-player').textContent = `Current Player: ${currentPlayer}`;
-}
-
-function checkGameOver() {
-    const allRevealed = grid.every(cell => cell.revealed);
-    if (allRevealed) {
-        gameState = 'GAME_OVER';
-        showGameOverDialog();
-    }
-}
-
-function showGameOverDialog() {
-    const gameOverDialog = document.getElementById('game-over-dialog');
-    gameOverDialog.style.display = 'block';
-
-    const winnerText = document.getElementById('winner-text');
-    if (scores.PLAYER1 > scores.CPU1) {
-        winnerText.textContent = 'PLAYER1 wins!';
-    } else if (scores.CPU1 > scores.PLAYER1) {
-        winnerText.textContent = 'CPU1 wins!';
-    } else {
-        winnerText.textContent = 'It\'s a tie!';
-    }
-
-    document.getElementById('final-score-player1').textContent = scores.PLAYER1;
-    document.getElementById('final-score-cpu1').textContent = scores.CPU1;
-
-    const restartButton = document.getElementById('restart-game');
-    restartButton.addEventListener('click', () => {
-        gameOverDialog.style.display = 'none';
-        initializeGame();
-    });
-}
-
-function isValidMove(index) {
-    return !grid[index].revealed && !grid[index].tempRevealed;
-}
-
-function revealCell(index) {
-    const cell = grid[index];
-    cell.tempRevealed = true;
-    renderGame();
-
-    setTimeout(() => {
-        cell.tempRevealed = false;
-        cell.revealed = true;
-        cell.owner = currentPlayer;
-        playerCells[currentPlayer].push(cell.value);
-        calculateScore(currentPlayer, cell.value);
-        calculateCombos(currentPlayer);
-        renderGame();
-        switchPlayer();
-    }, REVEAL_TIME);
-}
-
-function calculateScore(player, value) {
-    scores[player] += value * scoreMultipliers[player];
-}
-
-function calculateCombos(player) {
-    const playerCellsSum = playerCells[player].reduce((acc, curr) => acc + curr, 0);
-
-    if (playerCellsSum % 5 === 0) {
-        scoreMultipliers[player] += fiveMultipliers[player];
-        combos[player].push({ type: 'five' });
-    }
-
-    if (playerCellsSum % 2 !== 0) {
-        scoreMultipliers[player]++;
-        combos[player].push({ type: 'odd' });
-    }
-
-    if (playerCellsSum % 2 === 0) {
-        scoreMultipliers[player]++;
-        combos[player].push({ type: 'even' });
-    }
-}
-
-function switchPlayer() {
-    currentPlayer = currentPlayer === 'PLAYER1' ? 'CPU1' : 'PLAYER1';
-
-    if (currentPlayer === 'CPU1' && gameState === 'PLAYING') {
-        cpuMove();
-    }
-
-    updateCurrentPlayer();
-}
-
-function cpuMove() {
-    const validMoves = grid.filter((cell, index) => isValidMove(index));
-    if (validMoves.length > 0) {
-        const randomIndex = Math.floor(Math.random() * validMoves.length);
-        const chosenCell = validMoves[randomIndex];
-        revealCell(grid.indexOf(chosenCell));
-    }
-}
-
-initializeGame(); // Start the game immediately on page load
+const REVEAL_TIME=2000,MAX_COMBO=10;let gameState='START',gridSize=10,grid=[],currentPlayer='PLAYER1',playerCells={PLAYER1:[],CPU1:[]},scores={PLAYER1:0,CPU1:0},combos={PLAYER1:[],CPU1:[]},scoreMultipliers={PLAYER1:1,CPU1:1},fiveMultipliers={PLAYER1:1,CPU1:1},isRevealing=!1;function initializeGame(){const e=gridSize*gridSize;grid=Array.from({length:e},(e,r)=>({value:r+1,revealed:!1,owner:null,tempRevealed:!1}));for(let e=grid.length-1;e>0;e--){const r=Math.floor(Math.random()*(e+1));[grid[e],grid[r]]=[grid[r],grid[e]]}currentPlayer='PLAYER1',playerCells={PLAYER1:[],CPU1:[]},scores={PLAYER1:0,CPU1:0},combos={PLAYER1:[],CPU1:[]},scoreMultipliers={PLAYER1:1,CPU1:1},fiveMultipliers={PLAYER1:1,CPU1:1},gameState='PLAYING',renderGame()}function isValidMove(e){return!grid[e].revealed&&(0===playerCells[currentPlayer].length||getSurroundingIndices(e).some(e=>playerCells[currentPlayer].includes(e)))}function getSurroundingIndices(e){const r=Math.floor(e/gridSize),t=e%gridSize;return[e-gridSize-1,e-gridSize,e-gridSize+1,e-1,e+1,e+gridSize-1,e+gridSize,e+gridSize+1].filter(e=>{const a=Math.floor(e/gridSize),l=e%gridSize;return a>=0&&a<gridSize&&l>=0&&l<gridSize&&Math.abs(a-r)<=1&&Math.abs(l-t)<=1})}function handleCellClick(e){isRevealing||'GAME_OVER'===gameState||'PLAYER1'!==currentPlayer||!isValidMove(e)||makeMove(e)}function makeMove(e){if('GAME_OVER'===gameState)return;grid[e].revealed=!0,grid[e].owner=currentPlayer,playerCells[currentPlayer].push(e),updateCombo(grid[e].value),updateScore(),revealSurroundingCells(e),renderGame(),checkGameEnd()}function updateCombo(e){const r=e%2==0,t=e%5==0,a=combos[currentPlayer].find(e=>'FIVE'===e.type),l=combos[currentPlayer].filter(e=>'EVEN'===e.type&&r||'ODD'===e.type&&!r||'FIVE'===e.type&&t).map(e=>({...e,count:'FIVE'===e.type?Math.min(e.count+1,2):Math.min(e.count+1,MAX_COMBO)}));if(t){a?2===a.count&&(fiveMultipliers[currentPlayer]*=2,l.find(e=>'FIVE'===e.type).count=0):l.push({type:'FIVE',count:1})}r&&!l.some(e=>'EVEN'===e.type)?l.push({type:'EVEN',count:1}):r||l.some(e=>'ODD'===e.type)||l.push({type:'ODD',count:1}),combos[currentPlayer]=l,updateScoreMultiplier(),updateComboBars()}function updateScoreMultiplier(){let e=1;combos[currentPlayer].forEach(r=>{'FIVE'!==r.type&&(e=Math.max(e,r.count))}),scoreMultipliers[currentPlayer]=e*fiveMultipliers[currentPlayer]}function updateScore(){scores[currentPlayer]+=1*scoreMultipliers[currentPlayer],document.getElementById(`${currentPlayer.toLowerCase()}-score`).textContent=Math.floor(scores[currentPlayer]),document.getElementById(`${currentPlayer.toLowerCase()}-multiplier`).textContent=scoreMultipliers[currentPlayer]}function updateComboBars(){['FIVE','ODD','EVEN'].forEach(e=>{const r=combos[currentPlayer].find(r=>r.type===e),t=document.getElementById(`${currentPlayer.toLowerCase()}-${e.toLowerCase()}`);if(r){const a='FIVE'===e?50*r.count:Math.min(10*r.count,100);t.style.width=`${a}%`,t.classList.toggle('maxed',r.count>=('FIVE'===e?2:MAX_COMBO)),t.classList.toggle('flashing','FIVE'===e&&2===r.count)}else t.style.width='0%',t.classList.remove('maxed','flashing')})}function revealSurroundingCells(e){isRevealing=!0;const r=getSurroundingIndices(e);r.forEach(e=>{grid[e].revealed||(grid[e].tempRevealed=!0)}),renderGame(),setTimeout(()=>{r.forEach(e=>{grid[e].tempRevealed=!1}),isRevealing=!1,currentPlayer='PLAYER1'===currentPlayer?'CPU1':'PLAYER1',renderGame(),'CPU1'===currentPlayer&&'PLAYING'===gameState?setTimeout(makeCPUMove,500):checkGameEnd()},REVEAL_TIME)}function makeCPUMove(){if('GAME_OVER'===gameState)return;const e=getValidMoves();e.length>0?makeMove(e[Math.floor(Math.random()*e.length)]):checkGameEnd()}function getValidMoves(){return grid.reduce((e,r,t)=>isValidMove(t)?[...e,t]:e,[])}function hasValidMoves(e){return grid.some((r,t)=>!r.revealed&&(0===playerCells[e].length||getSurroundingIndices(t).some(r=>playerCells[e].includes(r))))}function isAllRevealed(){return grid.every(e=>e.revealed)}function checkGameEnd(){isAllRevealed()||!hasValidMoves('PLAYER1')&&!hasValidMoves('CPU1')?endGame():('PLAYER1'===currentPlayer&&!hasValidMoves('PLAYER1')||'CPU1'===currentPlayer&&!hasValidMoves('CPU1'))&&(currentPlayer='PLAYER1'===currentPlayer?'CPU1':'PLAYER1',renderGame(),'CPU1'===currentPlayer&&setTimeout(makeCPUMove,500))}function endGame(){gameState='GAME_OVER',renderGame();const e=scores.PLAYER1>scores.CPU1?'You win!':'CPU wins!';document.getElementById('winner-text').textContent=e,document.getElementById('final-score-player1').textContent=Math.floor(scores.PLAYER1),document.getElementById('final-score-cpu1').textContent=Math.floor(scores.CPU1),document.getElementById('game-over-dialog').style.display='block'}function renderGame(){const e=document.getElementById('grid');e.style.gridTemplateColumns=`repeat(${gridSize}, 1fr)`,e.innerHTML='',grid.forEach((r,t)=>{const a=document.createElement('div');a.className='cell',r.revealed?(a.classList.add(`revealed-${r.owner.toLowerCase()}`),a.textContent=r.value):r.tempRevealed?(a.classList.add('temp-revealed'),a.textContent=r.value):isValidMove(t)&&'PLAYER1'===currentPlayer&&'PLAYING'===gameState&&a.classList.add('valid-move'),a.addEventListener('click',()=>handleCellClick(t)),e.appendChild(a)}),document.getElementById('player1-info').classList.toggle('active','PLAYER1'===currentPlayer),document.getElementById('cpu1-info').classList.toggle('active','CPU1'===currentPlayer),document.getElementById('current-player').textContent=`Current Player: ${'GAME_OVER'===gameState?'Game Over':currentPlayer}`,updateComboBars()}document.getElementById('start-game').addEventListener('click',()=>{gridSize=parseInt(document.getElementById('grid-size').value),document.getElementById('game-start').style.display='none',document.getElementById('game-play').style.display='block',initializeGame()}),document.getElementById('reset-game').addEventListener('click',()=>{document.getElementById('game-play').style.display='none',document.getElementById('game-start').style.display='block',gameState='START'}),document.getElementById('restart-game').addEventListener('click',()=>{document.getElementById('game-over-dialog').style.display='none',document.getElementById('game-play').style.display='none',document.getElementById('game-start').style.display='block',gameState='START'});
 </script>
 </body>
 </html>
