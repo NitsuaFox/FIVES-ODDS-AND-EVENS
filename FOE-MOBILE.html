@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FOE Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .game-container {
+            max-width: 500px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        .grid {
+            display: grid;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+        .cell {
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            background-color: #e0e0e0;
+            transition: background-color 0.3s;
+        }
+        .cell.revealed-player1 { background-color: #3498db; color: white; }
+        .cell.revealed-cpu1 { background-color: #e67e22; color: white; }
+        .cell.valid-move { border: 2px solid #2ecc71; }
+        .cell.temp-revealed { background-color: #f1c40f; }
+        .player-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .player-box {
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .player-box.active { background-color: #e8f8e8; }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>FOE Game</h1>
+        <div id="game-start">
+            <label for="grid-size">Select Grid Size:</label>
+            <select id="grid-size">
+                <option value="5">5x5</option>
+                <option value="10">10x10</option>
+            </select>
+            <button id="start-game">Start Game</button>
+        </div>
+        <div id="game-play" style="display: none;">
+            <div class="player-info">
+                <div id="player1-info" class="player-box">
+                    <h2>PLAYER1</h2>
+                    <p>Score: <span id="player1-score">0</span></p>
+                </div>
+                <div id="cpu1-info" class="player-box">
+                    <h2>CPU1</h2>
+                    <p>Score: <span id="cpu1-score">0</span></p>
+                </div>
+            </div>
+            <div id="grid" class="grid"></div>
+            <div id="current-player"></div>
+            <button id="reset-game">Reset Game</button>
+        </div>
+    </div>
+
+    <script>
+        const REVEAL_TIME = 2000;
+        let gameState = 'START';
+        let gridSize = 10;
+        let grid = [];
+        let currentPlayer = 'PLAYER1';
+        let playerCells = { PLAYER1: [], CPU1: [] };
+        let scores = { PLAYER1: 0, CPU1: 0 };
+        let isRevealing = false;
+
+        function initializeGame() {
+            const totalCells = gridSize * gridSize;
+            grid = Array.from({ length: totalCells }, (_, i) => ({
+                value: i + 1,
+                revealed: false,
+                owner: null,
+                tempRevealed: false
+            }));
+            for (let i = grid.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [grid[i], grid[j]] = [grid[j], grid[i]];
+            }
+            currentPlayer = 'PLAYER1';
+            playerCells = { PLAYER1: [], CPU1: [] };
+            scores = { PLAYER1: 0, CPU1: 0 };
+            gameState = 'PLAYING';
+            renderGame();
+        }
+
+        function isValidMove(index) {
+            if (grid[index].revealed) return false;
+            if (playerCells[currentPlayer].length === 0) return true;
+            return getSurroundingIndices(index).some(i => playerCells[currentPlayer].includes(i));
+        }
+
+        function getSurroundingIndices(index) {
+            const row = Math.floor(index / gridSize);
+            const col = index % gridSize;
+            return [
+                index - gridSize - 1, index - gridSize, index - gridSize + 1,
+                index - 1, index + 1,
+                index + gridSize - 1, index + gridSize, index + gridSize + 1
+            ].filter(i => {
+                const r = Math.floor(i / gridSize);
+                const c = i % gridSize;
+                return r >= 0 && r < gridSize && c >= 0 && c < gridSize && 
+                       Math.abs(r - row) <= 1 && Math.abs(c - col) <= 1;
+            });
+        }
+
+        function handleCellClick(index) {
+            if (isRevealing || currentPlayer !== 'PLAYER1' || !isValidMove(index)) return;
+            makeMove(index);
+        }
+
+        function makeMove(index) {
+            grid[index].revealed = true;
+            grid[index].owner = currentPlayer;
+            playerCells[currentPlayer].push(index);
+            updateScore(grid[index].value);
+            revealSurroundingCells(index);
+            renderGame();
+        }
+
+        function updateScore(value) {
+            scores[currentPlayer] += value;
+            document.getElementById(`${currentPlayer.toLowerCase()}-score`).textContent = scores[currentPlayer];
+        }
+
+        function revealSurroundingCells(index) {
+            isRevealing = true;
+            const surroundingIndices = getSurroundingIndices(index);
+            surroundingIndices.forEach(i => {
+                if (!grid[i].revealed) grid[i].tempRevealed = true;
+            });
+            renderGame();
+
+            setTimeout(() => {
+                surroundingIndices.forEach(i => {
+                    grid[i].tempRevealed = false;
+                });
+                isRevealing = false;
+                currentPlayer = currentPlayer === 'PLAYER1' ? 'CPU1' : 'PLAYER1';
+                renderGame();
+                if (currentPlayer === 'CPU1') {
+                    setTimeout(makeCPUMove, 500);
+                }
+            }, REVEAL_TIME);
+        }
+
+        function makeCPUMove() {
+            const availableMoves = grid.reduce((moves, cell, index) => 
+                isValidMove(index) ? [...moves, index] : moves, []);
+
+            if (availableMoves.length > 0) {
+                const randomMove = availableMoves[Math.floor(Math.random() * availableMoves.length)];
+                makeMove(randomMove);
+            } else {
+                gameState = 'GAME_OVER';
+                renderGame();
+            }
+        }
+
+        function renderGame() {
+            const gridElement = document.getElementById('grid');
+            gridElement.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+            gridElement.innerHTML = '';
+
+            grid.forEach((cell, index) => {
+                const cellElement = document.createElement('div');
+                cellElement.className = 'cell';
+                if (cell.revealed) {
+                    cellElement.classList.add(`revealed-${cell.owner.toLowerCase()}`);
+                    cellElement.textContent = cell.value;
+                } else if (cell.tempRevealed) {
+                    cellElement.classList.add('temp-revealed');
+                    cellElement.textContent = cell.value;
+                } else if (isValidMove(index) && currentPlayer === 'PLAYER1') {
+                    cellElement.classList.add('valid-move');
+                }
+                cellElement.addEventListener('click', () => handleCellClick(index));
+                gridElement.appendChild(cellElement);
+            });
+
+            document.getElementById('player1-info').classList.toggle('active', currentPlayer === 'PLAYER1');
+            document.getElementById('cpu1-info').classList.toggle('active', currentPlayer === 'CPU1');
+            document.getElementById('current-player').textContent = `Current Player: ${currentPlayer}`;
+
+            if (gameState === 'GAME_OVER') {
+                const winner = scores.PLAYER1 > scores.CPU1 ? 'You win!' : 'CPU wins!';
+                alert(`Game Over! ${winner}`);
+            }
+        }
+
+        document.getElementById('start-game').addEventListener('click', () => {
+            gridSize = parseInt(document.getElementById('grid-size').value);
+            document.getElementById('game-start').style.display = 'none';
+            document.getElementById('game-play').style.display = 'block';
+            initializeGame();
+        });
+
+        document.getElementById('reset-game').addEventListener('click', () => {
+            document.getElementById('game-play').style.display = 'none';
+            document.getElementById('game-start').style.display = 'block';
+            gameState = 'START';
+        });
+    </script>
+</body>
+</html>
