@@ -191,7 +191,245 @@
 <button id="restart-game">Play Again</button>
 </div>
 <script>
-    // Your JavaScript code remains unchanged
+const REVEAL_TIME = 2000;
+const MAX_COMBO = 10;
+
+let gameState = 'START';
+let gridSize = 10;
+let grid = [];
+let currentPlayer = 'PLAYER1';
+let playerCells = {
+    PLAYER1: [],
+    CPU1: []
+};
+let scores = {
+    PLAYER1: 0,
+    CPU1: 0
+};
+let combos = {
+    PLAYER1: [],
+    CPU1: []
+};
+let scoreMultipliers = {
+    PLAYER1: 1,
+    CPU1: 1
+};
+let fiveMultipliers = {
+    PLAYER1: 1,
+    CPU1: 1
+};
+let isRevealing = false;
+
+function initializeGame() {
+    const numCells = gridSize * gridSize;
+    grid = Array.from({ length: numCells }, (cell, index) => ({
+        value: index + 1,
+        revealed: false,
+        owner: null,
+        tempRevealed: false
+    }));
+
+    // Shuffle grid
+    for (let i = grid.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [grid[i], grid[j]] = [grid[j], grid[i]];
+    }
+
+    currentPlayer = 'PLAYER1';
+    playerCells = {
+        PLAYER1: [],
+        CPU1: []
+    };
+    scores = {
+        PLAYER1: 0,
+        CPU1: 0
+    };
+    combos = {
+        PLAYER1: [],
+        CPU1: []
+    };
+    scoreMultipliers = {
+        PLAYER1: 1,
+        CPU1: 1
+    };
+    fiveMultipliers = {
+        PLAYER1: 1,
+        CPU1: 1
+    };
+    gameState = 'PLAYING';
+
+    renderGame();
+}
+
+function renderGame() {
+    const gridElement = document.getElementById('grid');
+    gridElement.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+    gridElement.innerHTML = '';
+
+    grid.forEach((cell, index) => {
+        const cellElement = document.createElement('div');
+        cellElement.className = 'cell';
+
+        if (cell.revealed) {
+            cellElement.classList.add(`revealed-${cell.owner.toLowerCase()}`);
+            cellElement.textContent = cell.value;
+        } else if (cell.tempRevealed) {
+            cellElement.classList.add('temp-revealed');
+            cellElement.textContent = cell.value;
+        } else if (isValidMove(index) && currentPlayer === 'PLAYER1' && gameState === 'PLAYING') {
+            cellElement.classList.add('valid-move');
+        }
+
+        cellElement.addEventListener('click', () => {
+            if (!isRevealing && isValidMove(index) && gameState === 'PLAYING') {
+                revealCell(index);
+            }
+        });
+
+        gridElement.appendChild(cellElement);
+    });
+
+    updatePlayerInfo();
+    updateCurrentPlayer();
+    checkGameOver();
+}
+
+function updatePlayerInfo() {
+    document.getElementById('player1-score').textContent = scores.PLAYER1;
+    document.getElementById('player1-multiplier').textContent = scoreMultipliers.PLAYER1;
+    updateComboBars('player1');
+
+    document.getElementById('cpu1-score').textContent = scores.CPU1;
+    document.getElementById('cpu1-multiplier').textContent = scoreMultipliers.CPU1;
+    updateComboBars('cpu1');
+}
+
+function updateComboBars(player) {
+    const comboTypes = ['five', 'odd', 'even'];
+
+    comboTypes.forEach(type => {
+        const comboBar = document.getElementById(`${player}-${type}`);
+        const currentCombo = combos[player].filter(combo => combo.type === type).length;
+        const maxedCombo = currentCombo >= MAX_COMBO;
+        comboBar.style.width = `${(currentCombo / MAX_COMBO) * 100}%`;
+        comboBar.classList.toggle('maxed', maxedCombo);
+        comboBar.classList.toggle('flashing', maxedCombo && gameState === 'PLAYING');
+    });
+}
+
+function updateCurrentPlayer() {
+    document.getElementById('current-player').textContent = `Current Player: ${currentPlayer}`;
+}
+
+function checkGameOver() {
+    const allRevealed = grid.every(cell => cell.revealed);
+    if (allRevealed) {
+        gameState = 'GAME_OVER';
+        showGameOverDialog();
+    }
+}
+
+function showGameOverDialog() {
+    const gameOverDialog = document.getElementById('game-over-dialog');
+    gameOverDialog.style.display = 'block';
+
+    const winnerText = document.getElementById('winner-text');
+    if (scores.PLAYER1 > scores.CPU1) {
+        winnerText.textContent = 'PLAYER1 wins!';
+    } else if (scores.CPU1 > scores.PLAYER1) {
+        winnerText.textContent = 'CPU1 wins!';
+    } else {
+        winnerText.textContent = 'It\'s a tie!';
+    }
+
+    document.getElementById('final-score-player1').textContent = scores.PLAYER1;
+    document.getElementById('final-score-cpu1').textContent = scores.CPU1;
+
+    const restartButton = document.getElementById('restart-game');
+    restartButton.addEventListener('click', () => {
+        gameOverDialog.style.display = 'none';
+        initializeGame();
+    });
+}
+
+function isValidMove(index) {
+    return !grid[index].revealed && !grid[index].tempRevealed;
+}
+
+function revealCell(index) {
+    const cell = grid[index];
+    cell.tempRevealed = true;
+    renderGame();
+
+    setTimeout(() => {
+        cell.tempRevealed = false;
+        cell.revealed = true;
+        cell.owner = currentPlayer;
+        playerCells[currentPlayer].push(cell.value);
+        calculateScore(currentPlayer, cell.value);
+        calculateCombos(currentPlayer);
+        renderGame();
+        switchPlayer();
+    }, REVEAL_TIME);
+}
+
+function calculateScore(player, value) {
+    scores[player] += value * scoreMultipliers[player];
+}
+
+function calculateCombos(player) {
+    const playerCellsSum = playerCells[player].reduce((acc, curr) => acc + curr, 0);
+
+    if (playerCellsSum % 5 === 0) {
+        scoreMultipliers[player] += fiveMultipliers[player];
+        combos[player].push({ type: 'five' });
+    }
+
+    if (playerCellsSum % 2 !== 0) {
+        scoreMultipliers[player]++;
+        combos[player].push({ type: 'odd' });
+    }
+
+    if (playerCellsSum % 2 === 0) {
+        scoreMultipliers[player]++;
+        combos[player].push({ type: 'even' });
+    }
+}
+
+function switchPlayer() {
+    currentPlayer = currentPlayer === 'PLAYER1' ? 'CPU1' : 'PLAYER1';
+
+    if (currentPlayer === 'CPU1' && gameState === 'PLAYING') {
+        cpuMove();
+    }
+
+    updateCurrentPlayer();
+}
+
+function cpuMove() {
+    const validMoves = grid.filter((cell, index) => isValidMove(index));
+    if (validMoves.length > 0) {
+        const randomIndex = Math.floor(Math.random() * validMoves.length);
+        const chosenCell = validMoves[randomIndex];
+        revealCell(grid.indexOf(chosenCell));
+    }
+}
+
+document.getElementById('start-game').addEventListener('click', () => {
+    gridSize = parseInt(document.getElementById('grid-size').value, 10);
+    initializeGame();
+    document.getElementById('game-start').style.display = 'none';
+    document.getElementById('game-play').style.display = 'block';
+});
+
+document.getElementById('reset-game').addEventListener('click', () => {
+    document.getElementById('game-start').style.display = 'block';
+    document.getElementById('game-play').style.display = 'none';
+    document.getElementById('game-over-dialog').style.display = 'none';
+    gameState = 'START';
+});
+
+initializeGame();
 </script>
 </body>
 </html>
