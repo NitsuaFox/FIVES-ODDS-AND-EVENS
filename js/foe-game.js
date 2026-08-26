@@ -170,8 +170,8 @@
         const cpu = els.cpuPanel.getBoundingClientRect();
         const player = els.playerPanel.getBoundingClientRect();
         const board = els.board.getBoundingClientRect();
-            const clippedRight = cpu.right > window.innerWidth - 8;
-            const clippedLeft = player.left < 8;
+            const clippedRight = cpu.right > window.innerWidth - 16;
+            const clippedLeft = player.left < 16;
             const scrollW = document.documentElement.scrollWidth;
             debug.log('layout', {
                 vw: window.innerWidth,
