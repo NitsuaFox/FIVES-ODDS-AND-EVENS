@@ -29,7 +29,7 @@
   --stroke: rgba(255, 255, 255, 0.11);
 
   --font: 'Outfit', 'Segoe UI', system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
-  --font-display: 'Syne', 'Outfit', system-ui, sans-serif;
+  --font-display: 'Outfit', 'Segoe UI', system-ui, sans-serif;
 }
 
 * {
@@ -232,18 +232,22 @@ body {
 .menu__buttons .btn {
   min-width: 22cqw;
   font-family: var(--font-display);
+  align-items: stretch;
   justify-content: center;
   text-align: center;
+  padding: 2.2cqh 1.6cqw;
 }
 
 .menu__buttons .btn__label {
   font-family: var(--font-display);
   font-weight: 800;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
+  line-height: 1.05;
 }
 
 .menu__buttons .btn__sub {
   font-family: var(--font);
+  letter-spacing: 0.08em;
 }
 
 .menu__hint {
