@@ -37,12 +37,11 @@ body {
     max-width: 100%;
     height: 100%;
     overflow: hidden;
-    background:
-        radial-gradient(1200px 700px at 12% -10%, rgba(61, 169, 252, 0.18), transparent 55%),
-        radial-gradient(900px 600px at 110% 10%, rgba(255, 107, 74, 0.16), transparent 50%),
-        linear-gradient(160deg, var(--bg-0), var(--bg-1) 45%, #0a2433);
+    background: #04080d;
     color: var(--text);
     font-family: var(--font-ui);
+    display: grid;
+    place-items: center;
 }
 
 body {
@@ -50,11 +49,20 @@ body {
     min-height: 100dvh;
 }
 
+.stage {
+    position: relative;
+    width: min(100vw, calc(100vh * 16 / 9));
+    height: min(100vh, calc(100vw * 9 / 16));
+    overflow: hidden;
+    background:
+        radial-gradient(1200px 700px at 12% -10%, rgba(61, 169, 252, 0.18), transparent 55%),
+        radial-gradient(900px 600px at 110% 10%, rgba(255, 107, 74, 0.16), transparent 50%),
+        linear-gradient(160deg, var(--bg-0), var(--bg-1) 45%, #0a2433);
+}
+
 .game-shell {
     width: 100%;
-    max-width: 100%;
-    height: 100vh;
-    height: 100dvh;
+    height: 100%;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -208,7 +216,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px 16px;
+    padding: 16px 18px;
 }
 
 .start-card {
@@ -333,8 +341,8 @@ body {
     min-height: 0;
     width: 100%;
     max-width: 100%;
-    padding: 12px 32px 18px;
-    gap: 14px;
+    padding: 8px 18px 10px;
+    gap: 10px;
     grid-template-columns: minmax(0, 1fr) minmax(0, 2.2fr) minmax(0, 1fr);
     grid-template-areas: 'player board cpu';
     overflow: hidden;
@@ -1086,17 +1094,31 @@ body {
 @media (max-width: 980px) {
     #game-content {
         grid-template-columns: minmax(0, 1fr) minmax(0, 1.7fr) minmax(0, 1fr);
-        padding: 8px 20px 12px;
+        padding: 8px 12px 10px;
         gap: 8px;
     }
     .brand .tag { display: none; }
     .start-card { padding: 18px; }
 }
 
-@media (max-height: 740px) {
-    .top-bar { padding: 8px 12px; }
-    .side-panel { padding: 8px; gap: 7px; }
-    .score-value { font-size: 28px; }
+@media (max-height: 820px) {
+    .top-bar { padding: 6px 12px; }
+    .brand h1 { font-size: 13px; }
+    .side-panel { padding: 8px; gap: 6px; border-radius: 14px; }
+    .score-value { font-size: 24px; }
+    .mult-badge { font-size: 14px; padding: 4px 8px; }
+    .lead-banner { font-size: 11px; padding: 4px 6px; }
+    .mix-pill { padding: 4px 2px; }
+    .mix-pill b { font-size: 13px; }
+    .flavor { font-size: 12px; min-height: 0; padding: 4px 6px; }
+    .stat-chip { padding: 5px; }
+    .stat-chip b { font-size: 14px; }
+    .avatar { width: 34px; height: 34px; }
+    .panel-head h2 { font-size: 16px; }
+    #status { font-size: 15px; }
+    .start-card { padding: 16px; }
+    .logo-row .big { font-size: 22px; }
+    .rules { font-size: 14px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

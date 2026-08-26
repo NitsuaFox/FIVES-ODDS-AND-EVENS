@@ -170,17 +170,26 @@
         const cpu = els.cpuPanel.getBoundingClientRect();
         const player = els.playerPanel.getBoundingClientRect();
         const board = els.board.getBoundingClientRect();
-            const clippedRight = cpu.right > window.innerWidth - 16;
-            const clippedLeft = player.left < 16;
+        const stageEl = document.getElementById('stage');
+        const frame = stageEl ? stageEl.getBoundingClientRect() : {
+            left: 0,
+            right: window.innerWidth,
+            width: window.innerWidth,
+            height: window.innerHeight
+        };
+            const clippedRight = cpu.right > frame.right + 2;
+            const clippedLeft = player.left < frame.left - 2;
             const scrollW = document.documentElement.scrollWidth;
             debug.log('layout', {
                 vw: window.innerWidth,
                 vh: window.innerHeight,
+                stageW: Math.round(frame.width),
+                stageH: Math.round(frame.height),
                 grid: state.gridSize,
                 cell: state.cellSize,
                 playerLeft: Math.round(player.left),
                 cpuRight: Math.round(cpu.right),
-                cpuMargin: Math.round(window.innerWidth - cpu.right),
+                cpuMargin: Math.round(frame.right - cpu.right),
                 boardW: Math.round(board.width),
                 scrollW: scrollW,
                 overflowX: scrollW > window.innerWidth + 1,
@@ -805,6 +814,9 @@
         els.highNote.textContent = highNote;
         els.endModal.classList.add('is-on');
         debug.log('game.end', { result: result, player: p, cpu: c, high: rec.high });
+        if (FOE.wavedash && FOE.wavedash.submitScore) {
+            FOE.wavedash.submitScore(p);
+        }
     }
 
     function backToMenu() {
@@ -887,7 +899,16 @@
                 fitBoard();
             }).observe(els.boardStage);
         }
+        const stageNode = document.getElementById('stage');
+        if (window.ResizeObserver && stageNode) {
+            new ResizeObserver(function () {
+                fitBoard();
+            }).observe(stageNode);
+        }
         debug.log('ui.bound', { vw: window.innerWidth, vh: window.innerHeight });
+        if (FOE.wavedash && FOE.wavedash.init) {
+            FOE.wavedash.init();
+        }
     }
 
     FOE.game = {
