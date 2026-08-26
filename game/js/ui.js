@@ -55,6 +55,9 @@ export class UI {
     this._buildSetupOptions();
     this._bindOverlayButtons();
     log.log('UI ready');
+    // Log menu title/subtitle centers after first layout so alignment
+    // issues can be copy-pasted from the console.
+    requestAnimationFrame(() => this.logMenuAlignment());
   }
 
   /* ---------------- screens & overlays ---------------- */
@@ -63,6 +66,48 @@ export class UI {
     log.log('showScreen', name);
     Object.entries(this.el.screens).forEach(([key, node]) => {
       node.classList.toggle('is-active', key === name);
+    });
+    if (name === 'menu') {
+      requestAnimationFrame(() => this.logMenuAlignment());
+    }
+  }
+
+  /**
+   * Debug helper: report how the main-menu title and subtitle sit relative
+   * to the 16:9 stage. Copy the `[FOE:ui] menu alignment` line from the
+   * console if the tagline looks off-center.
+   */
+  logMenuAlignment() {
+    const stage = $('stage');
+    const title = document.querySelector('.brand__title');
+    const subtitle = document.querySelector('.brand__tag');
+    if (!stage || !title || !subtitle) {
+      log.warn('menu alignment: missing elements', {
+        stage: !!stage,
+        title: !!title,
+        subtitle: !!subtitle,
+      });
+      return;
+    }
+    const box = (el) => {
+      const r = el.getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      return {
+        x: +r.left.toFixed(1),
+        w: +r.width.toFixed(1),
+        cx: +cx.toFixed(1),
+        text: (el.textContent || '').replace(/\s+/g, ' ').trim(),
+      };
+    };
+    const s = box(stage);
+    const t = box(title);
+    const g = box(subtitle);
+    const round = (n) => +n.toFixed(1);
+    log.log('menu alignment', {
+      stageCx: s.cx,
+      title: { cx: t.cx, dx: round(t.cx - s.cx), w: t.w, text: t.text },
+      subtitle: { cx: g.cx, dx: round(g.cx - s.cx), w: g.w, text: g.text },
+      titleVsSubtitle: round(t.cx - g.cx),
     });
   }
 

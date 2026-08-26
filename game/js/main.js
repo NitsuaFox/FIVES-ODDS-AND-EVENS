@@ -33,6 +33,7 @@ async function boot() {
     ui,
     setDebug,
     toggleDebug,
+    logMenuAlignment: () => ui.logMenuAlignment(),
     get game() {
       return ui.game;
     },
@@ -76,6 +77,12 @@ async function boot() {
       toggleDebug();
     } else if (e.key === 'o' || e.key === 'O') {
       toggleOverlay(); // Wavedash friends/invites overlay (no-op standalone)
+    }
+  });
+
+  window.addEventListener('resize', () => {
+    if (ui.el.screens.menu.classList.contains('is-active')) {
+      ui.logMenuAlignment();
     }
   });
 
