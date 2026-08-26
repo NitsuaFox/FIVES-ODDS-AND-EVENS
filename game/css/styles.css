@@ -203,7 +203,8 @@ body {
 
 .brand__tag {
   /* Negative right margin cancels trailing letter-spacing so the
-     tagline glyphs share the title's center axis. */
+     tagline glyphs share the title's center axis. Keep the tag on one
+     line so it can be wider than FOE without wrapping. */
   margin: 1cqh -0.35em 0 0;
   font-size: 2.6cqh;
   letter-spacing: 0.35em;
@@ -211,7 +212,7 @@ body {
   color: var(--muted);
   text-align: center;
   width: max-content;
-  max-width: 100%;
+  white-space: nowrap;
 }
 
 .menu__buttons {
@@ -228,6 +229,8 @@ body {
   font-size: 1.8cqh;
   color: var(--muted);
   max-width: 60cqw;
+  text-align: center;
+  align-self: center;
 }
 
 /* ---------------- setup ---------------- */
