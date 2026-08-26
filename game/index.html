@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b1020" />
+    <title>FOE — Fives · Odds · Evens</title>
+    <link rel="stylesheet" href="./css/styles.css" />
+  </head>
+  <body>
+    <!-- Fixed 16:9 stage; everything scales with it. -->
+    <div id="stage" class="stage">
+      <!-- ============ MENU ============ -->
+      <section id="screen-menu" class="screen screen--menu is-active">
+        <div class="menu">
+          <div class="brand">
+            <h1 class="brand__title">
+              <span class="brand__f">F</span><span class="brand__o">O</span
+              ><span class="brand__e">E</span>
+            </h1>
+            <p class="brand__tag">Fives &middot; Odds &middot; Evens</p>
+          </div>
+          <nav class="menu__buttons">
+            <button class="btn btn--primary" id="menu-play">
+              <span class="btn__label">Play</span>
+              <span class="btn__sub">Local vs CPU</span>
+            </button>
+            <button class="btn btn--locked" id="menu-online" disabled aria-disabled="true">
+              <span class="btn__lock" aria-hidden="true">🔒</span>
+              <span class="btn__label">Online</span>
+              <span class="btn__sub">Coming soon</span>
+            </button>
+            <button class="btn btn--ghost" id="menu-howto">
+              <span class="btn__label">How to Play</span>
+            </button>
+          </nav>
+          <p class="menu__hint">A memory duel of combos. Reveal, remember, out-score the CPU.</p>
+        </div>
+        <footer class="menu__credit" id="menu-credit">
+          <span class="menu__credit-text">
+            developed by
+            <a id="menu-studio" href="https://w2d.games" target="_blank" rel="noopener noreferrer"
+              >w2d.games</a
+            >
+          </span>
+          <span class="menu__credit-sep" aria-hidden="true">·</span>
+          <span class="menu__version" id="menu-version">v0.1.0</span>
+        </footer>
+      </section>
+
+      <!-- ============ SETUP ============ -->
+      <section id="screen-setup" class="screen screen--setup">
+        <div class="setup">
+          <h2 class="setup__title">New Game</h2>
+
+          <div class="setup__group">
+            <h3 class="setup__label">Board size</h3>
+            <div class="option-row" id="size-options"></div>
+          </div>
+
+          <div class="setup__group">
+            <h3 class="setup__label">CPU difficulty</h3>
+            <div class="option-row" id="difficulty-options"></div>
+          </div>
+
+          <div class="setup__actions">
+            <button class="btn btn--ghost" id="setup-back">Back</button>
+            <button class="btn btn--primary" id="setup-start">Start Game</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ GAME ============ -->
+      <section id="screen-game" class="screen screen--game">
+        <header class="topbar">
+          <button class="icon-btn" id="game-menu" title="Menu">☰</button>
+          <div class="topbar__turn" id="turn-indicator">Your turn</div>
+          <div class="topbar__meta" id="phase-indicator">Start</div>
+        </header>
+
+        <div class="arena">
+          <!-- Player panel -->
+          <aside class="panel panel--you" id="panel-you">
+            <div class="panel__head">
+              <span class="panel__dot"></span>
+              <span class="panel__name">You</span>
+            </div>
+            <div class="panel__score" id="score-you">0</div>
+            <div class="panel__mult">
+              <span id="mult-you">1.0</span><span class="panel__mult-x">×</span>
+            </div>
+            <div class="meters" id="meters-you">
+              <div class="meter meter--odd"><span class="meter__k">O</span><div class="meter__track"><div class="meter__fill" data-kind="odd"></div></div></div>
+              <div class="meter meter--even"><span class="meter__k">E</span><div class="meter__track"><div class="meter__fill" data-kind="even"></div></div></div>
+              <div class="meter meter--five"><span class="meter__k">5</span><div class="meter__track"><div class="meter__fill" data-kind="five"></div></div></div>
+            </div>
+            <div class="history" id="history-you"></div>
+          </aside>
+
+          <!-- Board -->
+          <div class="board-wrap">
+            <div id="board" class="board" role="grid" aria-label="Game board"></div>
+          </div>
+
+          <!-- CPU panel -->
+          <aside class="panel panel--cpu" id="panel-cpu">
+            <div class="panel__head">
+              <span class="panel__dot"></span>
+              <span class="panel__name">CPU</span>
+            </div>
+            <div class="panel__score" id="score-cpu">0</div>
+            <div class="panel__mult">
+              <span id="mult-cpu">1.0</span><span class="panel__mult-x">×</span>
+            </div>
+            <div class="meters" id="meters-cpu">
+              <div class="meter meter--odd"><span class="meter__k">O</span><div class="meter__track"><div class="meter__fill" data-kind="odd"></div></div></div>
+              <div class="meter meter--even"><span class="meter__k">E</span><div class="meter__track"><div class="meter__fill" data-kind="even"></div></div></div>
+              <div class="meter meter--five"><span class="meter__k">5</span><div class="meter__track"><div class="meter__fill" data-kind="five"></div></div></div>
+            </div>
+            <div class="history" id="history-cpu"></div>
+          </aside>
+        </div>
+
+        <footer class="statusbar" id="statusbar">Pick your starting cell</footer>
+      </section>
+
+      <!-- ============ OVERLAYS ============ -->
+      <div id="overlay-howto" class="overlay">
+        <div class="overlay__card">
+          <h2>How to Play</h2>
+          <ul class="rules">
+            <li><b>Claim a start.</b> On your first turn, pick any cell on the board.</li>
+            <li><b>Grow your territory.</b> After that you can only reveal cells touching one of your own (including diagonals).</li>
+            <li><b>Peek &amp; remember.</b> Revealing a cell briefly shows the numbers around it — memorise them.</li>
+            <li>
+              <b>Build combos.</b> Chaining the same parity (all <span class="tag tag--odd">odd</span> or all
+              <span class="tag tag--even">even</span>) grows your multiplier. Multiples of
+              <span class="tag tag--five">5</span> stack a bigger bonus.
+            </li>
+            <li><b>Win.</b> When no moves remain, the higher score wins.</li>
+          </ul>
+          <button class="btn btn--primary" id="howto-close">Got it</button>
+        </div>
+      </div>
+
+      <div id="overlay-pause" class="overlay">
+        <div class="overlay__card overlay__card--small">
+          <h2>Paused</h2>
+          <div class="overlay__actions">
+            <button class="btn btn--primary" id="pause-resume">Resume</button>
+            <button class="btn btn--ghost" id="pause-quit">Quit to Menu</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="overlay-gameover" class="overlay">
+        <div class="overlay__card overlay__card--result">
+          <h2 id="result-title">Game Over</h2>
+          <div class="result__scores">
+            <div class="result__score result__score--you">
+              <span class="result__who">You</span>
+              <span class="result__val" id="result-you">0</span>
+            </div>
+            <div class="result__vs">vs</div>
+            <div class="result__score result__score--cpu">
+              <span class="result__who">CPU</span>
+              <span class="result__val" id="result-cpu">0</span>
+            </div>
+          </div>
+          <div class="overlay__actions">
+            <button class="btn btn--primary" id="result-again">Play Again</button>
+            <button class="btn btn--ghost" id="result-menu">Main Menu</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="./js/main.js"></script>
+  </body>
+</html>
