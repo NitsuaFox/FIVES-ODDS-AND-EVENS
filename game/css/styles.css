@@ -28,7 +28,8 @@
   --card-2: rgba(255, 255, 255, 0.07);
   --stroke: rgba(255, 255, 255, 0.11);
 
-  --font: 'Inter', 'Segoe UI', system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+  --font: 'Outfit', 'Segoe UI', system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+  --font-display: 'Syne', 'Outfit', system-ui, sans-serif;
 }
 
 * {
@@ -97,6 +98,8 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  text-align: center;
   gap: 0.3cqh;
   transition: transform 0.15s ease, background 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   backdrop-filter: blur(6px);
@@ -112,6 +115,14 @@ body {
   transform: translateY(0);
 }
 
+.btn__label,
+.btn__sub {
+  display: block;
+  width: 100%;
+  text-align: center;
+  line-height: 1.15;
+}
+
 .btn__label {
   font-size: 2.6cqh;
   font-weight: 700;
@@ -120,7 +131,21 @@ body {
 
 .btn__sub {
   font-size: 1.5cqh;
+  font-weight: 500;
   color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+.btn__headline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7cqw;
+  width: 100%;
+}
+
+.btn__headline .btn__label {
+  width: auto;
 }
 
 .btn--primary {
@@ -206,6 +231,19 @@ body {
 
 .menu__buttons .btn {
   min-width: 22cqw;
+  font-family: var(--font-display);
+  justify-content: center;
+  text-align: center;
+}
+
+.menu__buttons .btn__label {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.menu__buttons .btn__sub {
+  font-family: var(--font);
 }
 
 .menu__hint {
