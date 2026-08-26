@@ -194,6 +194,16 @@ body {
   text-align: center;
 }
 
+/* Title + subtitle share one center axis. Without this, .brand is a
+   shrink-wrapped block sized by the wider tagline, and the FOE letters
+   (a left-packed flex row) sit left of the subtitle. */
+.brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
 .brand__title {
   margin: 0;
   font-size: 16cqh;
@@ -201,6 +211,7 @@ body {
   letter-spacing: 0.06em;
   line-height: 0.9;
   display: flex;
+  justify-content: center;
   gap: 1cqw;
   filter: drop-shadow(0 1.2cqh 3cqh rgba(0, 0, 0, 0.5));
 }
@@ -216,11 +227,18 @@ body {
 }
 
 .brand__tag {
+  /* Extra left padding matches trailing letter-spacing so the
+     visible glyphs share the title's center axis. Keep the tag on
+     one line so it can be wider than FOE without wrapping. */
   margin: 1cqh 0 0;
+  padding-left: 0.35em;
   font-size: 2.6cqh;
   letter-spacing: 0.35em;
   text-transform: uppercase;
   color: var(--muted);
+  text-align: center;
+  width: max-content;
+  white-space: nowrap;
 }
 
 .menu__buttons {
@@ -254,6 +272,8 @@ body {
   font-size: 1.8cqh;
   color: var(--muted);
   max-width: 60cqw;
+  text-align: center;
+  align-self: center;
 }
 
 /* Studio credit pinned to the bottom of the main menu (does not shift the centered stack). */

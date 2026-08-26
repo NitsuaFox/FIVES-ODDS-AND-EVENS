@@ -62,6 +62,9 @@ export class UI {
     this._bindOverlayButtons();
     this._renderMenuCredit();
     log.log('UI ready');
+    // Log menu title/subtitle centers after first layout so alignment
+    // issues can be copy-pasted from the console.
+    requestAnimationFrame(() => this.logMenuAlignment());
   }
 
   /* ---------------- main-menu credit ---------------- */
@@ -110,12 +113,64 @@ export class UI {
     Object.entries(this.el.screens).forEach(([key, node]) => {
       node.classList.toggle('is-active', key === name);
     });
-    if (name === 'menu' && this.el.menuCredit) {
-      log.log('menu credit visible', {
-        text: this.el.menuCredit.innerText.replace(/\s+/g, ' ').trim(),
-        version: this.el.menuCredit.dataset.version,
-      });
+    if (name === 'menu') {
+      requestAnimationFrame(() => this.logMenuAlignment());
+      if (this.el.menuCredit) {
+        log.log('menu credit visible', {
+          text: this.el.menuCredit.innerText.replace(/\s+/g, ' ').trim(),
+          version: this.el.menuCredit.dataset.version,
+        });
+      }
     }
+  }
+
+  /**
+   * Debug helper: report how the main-menu title and subtitle sit relative
+   * to the 16:9 stage. Copy the `[FOE:ui] menu alignment` line from the
+   * console if the tagline looks off-center.
+   */
+  logMenuAlignment() {
+    const stage = $('stage');
+    const title = document.querySelector('.brand__title');
+    const subtitle = document.querySelector('.brand__tag');
+    if (!stage || !title || !subtitle) {
+      log.warn('menu alignment: missing elements', {
+        stage: !!stage,
+        title: !!title,
+        subtitle: !!subtitle,
+      });
+      return;
+    }
+    const box = (el) => {
+      const r = el.getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      let glyphCx = cx;
+      try {
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        const g = range.getBoundingClientRect();
+        if (g.width > 0) glyphCx = g.left + g.width / 2;
+      } catch {
+        /* Range may fail on empty nodes; fall back to element box. */
+      }
+      return {
+        x: +r.left.toFixed(1),
+        w: +r.width.toFixed(1),
+        cx: +cx.toFixed(1),
+        glyphCx: +glyphCx.toFixed(1),
+        text: (el.textContent || '').replace(/\s+/g, ' ').trim(),
+      };
+    };
+    const s = box(stage);
+    const t = box(title);
+    const g = box(subtitle);
+    const round = (n) => +n.toFixed(1);
+    log.log('menu alignment', {
+      stageCx: s.cx,
+      title: { cx: t.cx, glyphCx: t.glyphCx, dx: round(t.glyphCx - s.cx), w: t.w, text: t.text },
+      subtitle: { cx: g.cx, glyphCx: g.glyphCx, dx: round(g.glyphCx - s.cx), w: g.w, text: g.text },
+      titleVsSubtitle: round(t.glyphCx - g.glyphCx),
+    });
   }
 
   showOverlay(name) {
