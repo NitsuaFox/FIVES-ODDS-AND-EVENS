@@ -55,6 +55,7 @@ def main() -> int:
         return 1
 
     log.info("FOE dev server ready")
+    log.info("New 16:9 game: http://localhost:%s/game/", port)
     log.info("Desktop game:  http://localhost:%s/FOE.html", port)
     log.info("Mobile game:   http://localhost:%s/FOE-MOBILE.html", port)
     log.info("Directory idx: http://localhost:%s/", port)
