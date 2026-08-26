@@ -92,10 +92,20 @@ export class UI {
     const box = (el) => {
       const r = el.getBoundingClientRect();
       const cx = r.left + r.width / 2;
+      let glyphCx = cx;
+      try {
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        const g = range.getBoundingClientRect();
+        if (g.width > 0) glyphCx = g.left + g.width / 2;
+      } catch {
+        /* Range may fail on empty nodes; fall back to element box. */
+      }
       return {
         x: +r.left.toFixed(1),
         w: +r.width.toFixed(1),
         cx: +cx.toFixed(1),
+        glyphCx: +glyphCx.toFixed(1),
         text: (el.textContent || '').replace(/\s+/g, ' ').trim(),
       };
     };
@@ -105,9 +115,9 @@ export class UI {
     const round = (n) => +n.toFixed(1);
     log.log('menu alignment', {
       stageCx: s.cx,
-      title: { cx: t.cx, dx: round(t.cx - s.cx), w: t.w, text: t.text },
-      subtitle: { cx: g.cx, dx: round(g.cx - s.cx), w: g.w, text: g.text },
-      titleVsSubtitle: round(t.cx - g.cx),
+      title: { cx: t.cx, glyphCx: t.glyphCx, dx: round(t.glyphCx - s.cx), w: t.w, text: t.text },
+      subtitle: { cx: g.cx, glyphCx: g.glyphCx, dx: round(g.glyphCx - s.cx), w: g.w, text: g.text },
+      titleVsSubtitle: round(t.glyphCx - g.glyphCx),
     });
   }
 
