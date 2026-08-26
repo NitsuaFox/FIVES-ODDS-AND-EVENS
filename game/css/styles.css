@@ -214,6 +214,53 @@ body {
   max-width: 60cqw;
 }
 
+/* Studio credit pinned to the bottom of the main menu (does not shift the centered stack). */
+.menu__credit {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 2.6cqh;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 1.1cqw;
+  margin: 0;
+  padding: 0 3cqw;
+  font-size: 1.45cqh;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  opacity: 0.88;
+  pointer-events: none;
+}
+
+.menu__credit-text,
+.menu__version {
+  white-space: nowrap;
+}
+
+.menu__credit a {
+  pointer-events: auto;
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(147, 161, 196, 0.35);
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.menu__credit a:hover,
+.menu__credit a:focus-visible {
+  color: var(--text);
+  border-bottom-color: currentColor;
+}
+
+.menu__credit-sep {
+  opacity: 0.55;
+}
+
+.menu__version {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.14em;
+}
+
 /* ---------------- setup ---------------- */
 
 .screen--setup {
