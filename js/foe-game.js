@@ -150,7 +150,13 @@
         const h = stage.clientHeight;
         const cell = Math.max(
             16,
-            Math.floor(Math.min((w - pad - gap * (size - 1)) / size, (h - pad - gap * (size - 1)) / size, 64))
+            Math.floor(
+                Math.min(
+                    (w - pad - gap * (size - 1)) / size,
+                    (h - pad - gap * (size - 1)) / size,
+                    64
+                ) * 0.96
+            )
         );
         state.cellSize = cell;
         els.board.style.setProperty('--cell-size', cell + 'px');
@@ -164,19 +170,23 @@
         const cpu = els.cpuPanel.getBoundingClientRect();
         const player = els.playerPanel.getBoundingClientRect();
         const board = els.board.getBoundingClientRect();
-        const clippedRight = cpu.right > window.innerWidth + 1;
-        const clippedLeft = player.left < -1;
-        debug.log('layout', {
-            vw: window.innerWidth,
-            vh: window.innerHeight,
-            grid: state.gridSize,
-            cell: state.cellSize,
-            playerLeft: Math.round(player.left),
-            cpuRight: Math.round(cpu.right),
-            boardW: Math.round(board.width),
-            clippedRight: clippedRight,
-            clippedLeft: clippedLeft
-        });
+            const clippedRight = cpu.right > window.innerWidth - 8;
+            const clippedLeft = player.left < 8;
+            const scrollW = document.documentElement.scrollWidth;
+            debug.log('layout', {
+                vw: window.innerWidth,
+                vh: window.innerHeight,
+                grid: state.gridSize,
+                cell: state.cellSize,
+                playerLeft: Math.round(player.left),
+                cpuRight: Math.round(cpu.right),
+                cpuMargin: Math.round(window.innerWidth - cpu.right),
+                boardW: Math.round(board.width),
+                scrollW: scrollW,
+                overflowX: scrollW > window.innerWidth + 1,
+                clippedRight: clippedRight,
+                clippedLeft: clippedLeft
+            });
         if (clippedRight || clippedLeft) {
             debug.log('layout.CLIPPED', {
                 cpuRight: Math.round(cpu.right),
@@ -257,6 +267,81 @@
         if (best.c >= 4) return 'HOT STREAK';
         if (best.c >= 3) return best.t + ' x' + best.c;
         return '';
+    }
+
+        function paintPips(id, heat) {
+        const wrap = $(id);
+        if (!wrap) return;
+        wrap.innerHTML = '';
+        for (let i = 0; i < 8; i++) {
+            const pip = document.createElement('span');
+            if (i < heat) pip.className = heat >= 5 ? 'on hot' : 'on';
+            wrap.appendChild(pip);
+        }
+    }
+
+    function paintLead(id, player) {
+        const el = $(id);
+        if (!el) return;
+        const other = player === 'PLAYER1' ? 'CPU1' : 'PLAYER1';
+        const delta = state.scores[player] - state.scores[other];
+        el.classList.remove('ahead', 'behind', 'tied');
+        if (delta > 0) {
+            el.classList.add('ahead');
+            el.textContent = 'Ahead +' + delta;
+        } else if (delta < 0) {
+            el.classList.add('behind');
+            el.textContent = 'Behind ' + delta;
+        } else {
+            el.classList.add('tied');
+            el.textContent = 'Even match';
+        }
+    }
+
+    function paintMix(prefix, player) {
+        const counts = state.counts[player];
+        ['even', 'odd', 'fives'].forEach(function (key) {
+            const el = $(prefix + '-mix-' + key);
+            if (!el) return;
+            const next = String(counts[key]);
+            if (el.textContent !== next) {
+                el.textContent = next;
+                const pill = el.parentElement;
+                pill.classList.remove('bump');
+                void pill.offsetWidth;
+                pill.classList.add('bump');
+            }
+        });
+    }
+
+    function flavorFor(player) {
+        const other = player === 'PLAYER1' ? 'CPU1' : 'PLAYER1';
+        const lead = state.scores[player] - state.scores[other];
+        const heat = maxCombo(player);
+        const last = state.lastValue[player];
+        const you = player === 'PLAYER1';
+        if (state.phase === 'OVER') return 'Match complete.';
+        if (state.claimed[player].length === 0) {
+            return you ? 'Pick a seed tile and grow your chain.' : 'Scanning the board for a landing spot.';
+        }
+        if (heat >= 6) return you ? 'Blazing! Protect that streak.' : 'CPU is on fire — break the parity.';
+        if (heat >= 4) return you ? 'Hot streak. Same parity, keep going.' : 'CPU found a chain. Stay aggressive.';
+        if (comboCount(player, 'FIVES') >= 2) return 'Fives engine is online.';
+        if (last && last % 5 === 0) return 'Last tile was a FIVE — hunt the next multiple.';
+        if (lead >= 6) return you ? 'Pulling away. Close the map.' : 'CPU is running away with it.';
+        if (lead <= -6) return you ? 'Need a spicy chain to catch up.' : 'CPU is scrambling for a combo.';
+        return you ? 'Expand, peek, then chain odds or evens.' : 'CPU is probing for a better cluster.';
+    }
+
+    function flashShell(kind) {
+        const shell = document.querySelector('.game-shell');
+        if (!shell) return;
+        shell.classList.remove('flash-player', 'flash-cpu', 'flash-gold');
+        void shell.offsetWidth;
+        shell.classList.add(kind);
+        setTimeout(function () {
+            shell.classList.remove(kind);
+        }, 280);
     }
 
     function setBar(id, value, max) {
@@ -343,6 +428,14 @@
         $('cpu-last').textContent = state.lastValue.CPU1 === null ? '-' : String(state.lastValue.CPU1);
         $('player-heat').textContent = String(maxCombo('PLAYER1'));
         $('cpu-heat').textContent = String(maxCombo('CPU1'));
+        paintPips('player-pips', maxCombo('PLAYER1'));
+        paintPips('cpu-pips', maxCombo('CPU1'));
+        paintLead('player-lead', 'PLAYER1');
+        paintLead('cpu-lead', 'CPU1');
+        paintMix('player', 'PLAYER1');
+        paintMix('cpu', 'CPU1');
+        $('player-flavor').textContent = flavorFor('PLAYER1');
+        $('cpu-flavor').textContent = flavorFor('CPU1');
 
         setBar('player-even-bar', comboCount('PLAYER1', 'EVEN'), 10);
         setBar('player-odd-bar', comboCount('PLAYER1', 'ODD'), 10);
@@ -468,14 +561,18 @@
             n.classList.remove('last-claim');
         });
         node.textContent = String(cell.value);
-        node.classList.add(player.toLowerCase(), 'last-claim');
+        node.classList.add(player.toLowerCase(), 'last-claim', 'flash-ring');
         node.classList.remove('available', 'temp-revealed');
+        setTimeout(function () {
+            node.classList.remove('flash-ring');
+        }, 420);
 
         const pos = cellCenter(index);
         const color = player === 'PLAYER1' ? '#3da9fc' : '#ff6b4a';
         FOE.fx.burst(pos.x, pos.y, color, 16 + Math.min(12, maxCombo(player) * 2));
         FOE.fx.popup(pos.x, pos.y - 10, '+' + gained, '#ffd166');
         FOE.audio.claim(player === 'PLAYER1');
+        flashShell(player === 'PLAYER1' ? 'flash-player' : 'flash-cpu');
 
         const best = combos.slice().sort(function (a, b) { return b.c - a.c; })[0];
         if (best && best.c >= 3) {
@@ -483,7 +580,10 @@
             FOE.fx.toast(best.t + ' x' + best.c, kind);
             FOE.audio.combo(best.t, best.c);
             showCallout(comboPhrase(combos));
-            if (best.c >= 5) FOE.fx.shake(240);
+            if (best.c >= 5) {
+                FOE.fx.shake(240);
+                flashShell('flash-gold');
+            }
         } else if (best && best.t === 'FIVES' && best.c >= 2) {
             FOE.audio.combo('FIVES', best.c);
             FOE.fx.toast('FIVES x' + best.c, 'fives');

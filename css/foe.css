@@ -34,6 +34,7 @@ html,
 body {
     margin: 0;
     width: 100%;
+    max-width: 100%;
     height: 100%;
     overflow: hidden;
     background:
@@ -51,7 +52,7 @@ body {
 
 .game-shell {
     width: 100%;
-    max-width: 100vw;
+    max-width: 100%;
     height: 100vh;
     height: 100dvh;
     display: flex;
@@ -59,6 +60,46 @@ body {
     overflow: hidden;
     position: relative;
 }
+
+.game-shell::before,
+.game-shell::after {
+    content: '';
+    position: absolute;
+    width: 42vw;
+    height: 42vw;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(10px);
+    animation: orb-drift 14s ease-in-out infinite;
+}
+
+.game-shell::before {
+    left: -12vw;
+    top: -8vw;
+    background: rgba(61, 169, 252, 0.12);
+}
+
+.game-shell::after {
+    right: -14vw;
+    bottom: -10vw;
+    background: rgba(255, 107, 74, 0.12);
+    animation-delay: -6s;
+}
+
+.game-shell > * {
+    position: relative;
+    z-index: 1;
+}
+
+@keyframes orb-drift {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(3%, 4%) scale(1.08); }
+}
+
+.game-shell.flash-player { box-shadow: inset 0 0 90px rgba(61, 169, 252, 0.28); }
+.game-shell.flash-cpu { box-shadow: inset 0 0 90px rgba(255, 107, 74, 0.24); }
+.game-shell.flash-gold { box-shadow: inset 0 0 110px rgba(255, 209, 102, 0.3); }
 
 .game-shell.is-shaking {
     animation: shell-shake 0.28s ease-in-out;
@@ -292,9 +333,9 @@ body {
     min-height: 0;
     width: 100%;
     max-width: 100%;
-    padding: 10px 12px 12px;
-    gap: 12px;
-    grid-template-columns: minmax(220px, 1fr) minmax(0, 2.1fr) minmax(220px, 1fr);
+    padding: 12px 22px 16px;
+    gap: 14px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2.2fr) minmax(0, 1fr);
     grid-template-areas: 'player board cpu';
     overflow: hidden;
 }
@@ -307,7 +348,8 @@ body {
     min-width: 0;
     min-height: 0;
     max-width: 100%;
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
     background: var(--panel);
     border: 1px solid var(--line);
     border-radius: 18px;
@@ -315,7 +357,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    box-shadow: var(--shadow);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
     transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
 }
 
@@ -324,12 +366,12 @@ body {
 
 .side-panel.active.player {
     border-color: var(--player);
-    box-shadow: 0 0 0 1px var(--player), 0 0 28px rgba(61, 169, 252, 0.22);
+    box-shadow: inset 0 0 0 1px rgba(61, 169, 252, 0.45), inset 0 0 34px rgba(61, 169, 252, 0.12);
 }
 
 .side-panel.active.cpu {
     border-color: var(--cpu);
-    box-shadow: 0 0 0 1px var(--cpu), 0 0 28px rgba(255, 107, 74, 0.22);
+    box-shadow: inset 0 0 0 1px rgba(255, 107, 74, 0.5), inset 0 0 34px rgba(255, 107, 74, 0.12);
 }
 
 .panel-head {
@@ -566,6 +608,106 @@ body {
 .combo-badge.odd { background: var(--odd); }
 .combo-badge.fives { background: var(--fives); }
 
+.lead-banner {
+    font-family: var(--font-num);
+    font-size: 13px;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    text-align: center;
+    padding: 6px 8px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--line);
+    color: var(--muted);
+}
+
+.lead-banner.ahead {
+    color: var(--even);
+    border-color: rgba(110, 229, 110, 0.4);
+    background: rgba(110, 229, 110, 0.08);
+}
+
+.lead-banner.behind {
+    color: var(--danger);
+    border-color: rgba(255, 93, 115, 0.35);
+    background: rgba(255, 93, 115, 0.08);
+}
+
+.lead-banner.tied {
+    color: var(--gold);
+}
+
+.mix-pills {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+}
+
+.mix-pill {
+    text-align: center;
+    border-radius: 10px;
+    padding: 6px 4px;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--line);
+}
+
+.mix-pill b {
+    display: block;
+    font-family: var(--font-num);
+    font-size: 16px;
+    color: var(--text);
+}
+
+.mix-pill.even b { color: var(--even); }
+.mix-pill.odd b { color: var(--odd); }
+.mix-pill.fives b { color: var(--fives); }
+
+.mix-pill.bump b {
+    animation: score-pop 0.35s ease;
+}
+
+.heat-pips {
+    display: flex;
+    gap: 4px;
+}
+
+.heat-pips span {
+    flex: 1;
+    height: 7px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+    transition: background 0.25s ease, box-shadow 0.25s ease;
+}
+
+.heat-pips span.on {
+    background: var(--gold);
+    box-shadow: 0 0 8px rgba(255, 209, 102, 0.7);
+}
+
+.heat-pips span.hot {
+    background: var(--cpu);
+    box-shadow: 0 0 8px rgba(255, 107, 74, 0.7);
+}
+
+.flavor {
+    margin: 0;
+    min-height: 34px;
+    font-size: 14px;
+    line-height: 1.3;
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.04);
+    border-left: 3px solid var(--gold);
+    border-radius: 0 10px 10px 0;
+    padding: 6px 8px;
+}
+
+.side-panel.cpu .flavor {
+    border-left-color: var(--cpu);
+}
+
 .board-column {
     grid-area: board;
     min-width: 0;
@@ -589,6 +731,19 @@ body {
     gap: 8px;
     margin-bottom: 8px;
 }
+
+.race-wrap {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 8px;
+    align-items: center;
+    font-size: 12px;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+}
+
+.race-wrap .you { color: var(--player); font-weight: 700; }
+.race-wrap .them { color: var(--cpu); font-weight: 700; }
 
 .race {
     height: 12px;
@@ -686,6 +841,7 @@ body {
     grid-template-rows: repeat(var(--grid-size), var(--cell-size));
     gap: var(--cell-gap);
     padding: 10px;
+    max-width: 100%;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--line);
     border-radius: 16px;
@@ -709,8 +865,13 @@ body {
     transition: transform 0.12s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
-.cell:hover {
-    transform: translateY(-1px);
+.cell.available:hover {
+    transform: scale(1.08);
+    background: rgba(110, 229, 110, 0.38);
+}
+
+.cell.flash-ring {
+    box-shadow: 0 0 0 4px rgba(255, 209, 102, 0.7), 0 0 18px rgba(255, 209, 102, 0.45);
 }
 
 .cell.player1 {
@@ -908,8 +1069,8 @@ body {
 
 @media (max-width: 980px) {
     #game-content {
-        grid-template-columns: minmax(180px, 0.9fr) minmax(0, 1.6fr) minmax(180px, 0.9fr);
-        padding: 8px;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.7fr) minmax(0, 1fr);
+        padding: 8px 14px 12px;
         gap: 8px;
     }
     .brand .tag { display: none; }

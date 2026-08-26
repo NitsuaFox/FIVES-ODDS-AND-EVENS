@@ -70,6 +70,14 @@
                     <div id="player1-score" class="score-value">0</div>
                     <div id="player1-multiplier" class="mult-badge">1.0x</div>
                 </div>
+                <div id="player-lead" class="lead-banner tied">Even match</div>
+                <div class="mix-pills">
+                    <div class="mix-pill even">EVEN <b id="player-mix-even">0</b></div>
+                    <div class="mix-pill odd">ODD <b id="player-mix-odd">0</b></div>
+                    <div class="mix-pill fives">FIVES <b id="player-mix-fives">0</b></div>
+                </div>
+                <div class="heat-pips" id="player-pips"></div>
+                <p id="player-flavor" class="flavor">Pick a seed tile and grow your chain.</p>
                 <div class="stat-grid">
                     <div class="stat-chip"><span>Territory</span><b id="player-territory">0</b></div>
                     <div class="stat-chip"><span>Heat</span><b id="player-heat">0</b></div>
@@ -93,9 +101,13 @@
 
             <main class="board-column">
                 <div class="board-chrome" id="board-chrome">
-                    <div class="race" aria-hidden="true">
-                        <div id="race-player" class="race-player"></div>
-                        <div id="race-cpu" class="race-cpu"></div>
+                    <div class="race-wrap">
+                        <span class="you">YOU</span>
+                        <div class="race" aria-hidden="true">
+                            <div id="race-player" class="race-player"></div>
+                            <div id="race-cpu" class="race-cpu"></div>
+                        </div>
+                        <span class="them">CPU</span>
                     </div>
                     <div class="status-row">
                         <p id="status">Ready</p>
@@ -124,6 +136,14 @@
                     <div id="cpu1-score" class="score-value">0</div>
                     <div id="cpu1-multiplier" class="mult-badge">1.0x</div>
                 </div>
+                <div id="cpu-lead" class="lead-banner tied">Even match</div>
+                <div class="mix-pills">
+                    <div class="mix-pill even">EVEN <b id="cpu-mix-even">0</b></div>
+                    <div class="mix-pill odd">ODD <b id="cpu-mix-odd">0</b></div>
+                    <div class="mix-pill fives">FIVES <b id="cpu-mix-fives">0</b></div>
+                </div>
+                <div class="heat-pips" id="cpu-pips"></div>
+                <p id="cpu-flavor" class="flavor">Scanning the board for a landing spot.</p>
                 <div class="stat-grid">
                     <div class="stat-chip"><span>Territory</span><b id="cpu-territory">0</b></div>
                     <div class="stat-chip"><span>Heat</span><b id="cpu-heat">0</b></div>
