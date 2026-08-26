@@ -2,12 +2,31 @@
 
 import { UI } from './ui.js';
 import { toggleDebug, setDebug, isDebug, createLogger } from './debug.js';
+import { initWavedash, toggleOverlay, hasSDK } from './wavedash.js';
 
 const log = createLogger('main');
 
-function boot() {
-  log.log('boot', { debug: isDebug() });
+// Optionally install the dev-only Wavedash mock (?mock=1) when no real SDK is
+// injected. This lets us exercise the integration on a plain static server.
+async function maybeInstallMock() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('mock') === '1' && !hasSDK()) {
+      log.log('loading dev Wavedash mock (?mock=1)');
+      await import('./wavedash-mock.js');
+    }
+  } catch (e) {
+    log.warn('mock install failed', e);
+  }
+}
+
+async function boot() {
+  log.log('boot', { debug: isDebug(), wavedashPresent: hasSDK() });
+  await maybeInstallMock();
   const ui = new UI();
+
+  // Reveal the game on the Wavedash platform (no-op when standalone).
+  initWavedash({ debug: isDebug() });
 
   // Expose a tiny console API for troubleshooting.
   window.FOE = {
@@ -55,6 +74,8 @@ function boot() {
       }
     } else if (e.key === 'd' || e.key === 'D') {
       toggleDebug();
+    } else if (e.key === 'o' || e.key === 'O') {
+      toggleOverlay(); // Wavedash friends/invites overlay (no-op standalone)
     }
   });
 

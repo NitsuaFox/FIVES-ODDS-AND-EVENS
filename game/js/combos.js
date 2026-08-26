@@ -59,12 +59,3 @@ export function applyPick(state, value) {
   log.log('applyPick', info);
   return info;
 }
-
-// Build short badge descriptors for a pick, for the history strip.
-export function badgesForInfo(info) {
-  const badges = [];
-  if (info.isFive) badges.push({ type: 'five', text: `×5 ${info.five}` });
-  if (info.isEven) badges.push({ type: 'even', text: `E ${info.even}` });
-  else badges.push({ type: 'odd', text: `O ${info.odd}` });
-  return badges;
-}

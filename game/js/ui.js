@@ -1,7 +1,7 @@
 // UI layer: DOM rendering, screen transitions, animations, input wiring.
 
 import { Game, Phase } from './game.js';
-import { badgesForInfo } from './combos.js';
+import { submitScore } from './wavedash.js';
 import {
   BOARD_SIZES,
   DIFFICULTIES,
@@ -311,6 +311,9 @@ export class UI {
     this.el.resultTitle.classList.toggle('result--lose', winner === PLAYERS.CPU);
     log.log('show game over', { score, winner });
     this.showOverlay('gameover');
+
+    // Submit the player's score to the Wavedash leaderboard (no-op standalone).
+    submitScore(score.YOU);
   }
 
   /* ---------------- pause ---------------- */
