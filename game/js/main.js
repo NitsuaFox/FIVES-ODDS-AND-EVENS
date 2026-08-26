@@ -3,6 +3,7 @@
 import { UI } from './ui.js';
 import { toggleDebug, setDebug, isDebug, createLogger } from './debug.js';
 import { initWavedash, toggleOverlay, hasSDK } from './wavedash.js';
+import { GAME_VERSION, STUDIO_NAME, STUDIO_URL } from './config.js';
 
 const log = createLogger('main');
 
@@ -21,7 +22,12 @@ async function maybeInstallMock() {
 }
 
 async function boot() {
-  log.log('boot', { debug: isDebug(), wavedashPresent: hasSDK() });
+  log.log('boot', {
+    debug: isDebug(),
+    wavedashPresent: hasSDK(),
+    version: GAME_VERSION,
+    studio: STUDIO_NAME,
+  });
   await maybeInstallMock();
   const ui = new UI();
 
@@ -31,6 +37,9 @@ async function boot() {
   // Expose a tiny console API for troubleshooting.
   window.FOE = {
     ui,
+    version: GAME_VERSION,
+    studio: STUDIO_NAME,
+    studioUrl: STUDIO_URL,
     setDebug,
     toggleDebug,
     get game() {

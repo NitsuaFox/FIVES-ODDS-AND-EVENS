@@ -1,6 +1,11 @@
 // Central configuration & tunable constants for the FOE game.
 // Keeping these in one place makes balancing and troubleshooting easy.
 
+// Shown on the main-menu credit. Bump GAME_VERSION when shipping a visible change.
+export const GAME_VERSION = '0.1.0';
+export const STUDIO_NAME = 'w2d.games';
+export const STUDIO_URL = 'https://w2d.games';
+
 export const PLAYERS = {
   YOU: 'YOU',
   CPU: 'CPU',
