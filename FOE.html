@@ -3,393 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FIVES,ODD'S & EVEN'S (FOE)</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-        
-        body {
-            font-family: 'Press Start 2P', cursive;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-            color: #fff;
-            overflow: hidden;
-        }
-        .game-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.7);
-            border-radius: 15px;
-            box-shadow: 0 0 30px rgba(0,0,0,0.5);
-            backdrop-filter: blur(10px);
-        }
-        .game-board-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        #game-board {
-            display: grid;
-            gap: 2px;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
-        }
-        .cell {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            cursor: pointer;
-            background: rgba(255, 255, 255, 0.3);
-            transition: all 0.3s ease;
-            border-radius: 5px;
-        }
-        .cell.revealed { background: rgba(220, 220, 220, 0.8); }
-        .cell.player1 { background: #1E90FF; color: white; }
-        .cell.cpu1 { background: #FF4500; color: white; }
-        .cell.available { box-shadow: 0 0 5px 2px #32CD32; }
-        .cell.temp-revealed { background: rgba(255, 255, 224, 0.8); }
-        #status, #combo-info {
-            margin: 10px 0;
-            font-size: 18px;
-            font-weight: bold;
-            color: #FFD700;
-        }
-        .player-info {
-            display: flex;
-            justify-content: space-around;
-            width: 100%;
-            margin-top: 20px;
-        }
-        .player-box {
-            flex: 1;
-            border: 2px solid #FFD700;
-            padding: 15px;
-            margin: 0 10px;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            transition: all 0.3s ease;
-        }
-        .player-box.active {
-            border-color: #32CD32;
-            background: rgba(224, 255, 224, 0.1);
-            transform: scale(1.05);
-        }
-        .history-container {
-            width: 200px;
-            margin: 0 20px;
-        }
-        .history-list {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
-            height: 400px;
-            overflow-y: auto;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-        }
-        .history-item {
-            padding: 10px 15px;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: #FFD700;
-        }
-        .history-item .number { font-weight: bold; }
-        .history-item .combo-info {
-            font-size: 0.9em;
-            display: flex;
-            gap: 5px;
-        }
-        .combo-badge {
-            padding: 3px 7px;
-            border-radius: 5px;
-            font-weight: bold;
-            color: #fff;
-        }
-        .combo-badge.even { background: #32CD32; }
-        .combo-badge.odd { background: #FF69B4; }
-        .combo-badge.fives { background: #1E90FF; }
-        #grid-size-selection {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        #grid-size-selection label {
-            margin-bottom: 10px;
-        }
-        #grid-size-selection select {
-            font-family: 'Press Start 2P', cursive;
-            font-size: 14px;
-            padding: 5px 10px;
-            background: rgba(255, 255, 255, 0.3);
-            border: 2px solid #FFD700;
-            border-radius: 5px;
-            color: #fff;
-            text-shadow: 0 0 5px #000;
-        }
-        #start-game {
-            margin-top: 20px;
-            padding: 10px 20px;
-            font-family: 'Press Start 2P', cursive;
-            font-size: 14px;
-            background: #32CD32;
-            border: none;
-            border-radius: 5px;
-            color: #fff;
-            cursor: pointer;
-            text-shadow: 0 0 5px #000;
-            transition: all 0.3s ease;
-        }
-        #start-game:hover {
-            background: #28a745;
-        }
-    </style>
+    <title>FOE — Fives, Odds & Evens</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Press+Start+2P&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/foe.css">
 </head>
 <body>
-    <div class="game-container">
-        <div id="grid-size-selection">
-            <label for="grid-size">Select Grid Size:</label>
-            <select id="grid-size">
-                <option value="5">5x5</option>
-                <option value="10" selected>10x10</option>
-            </select>
-            <button id="start-game">Start Game</button>
-        </div>
-        <div id="game-content" style="display: none;">
-            <div class="history-container">
-                <h3>Player 1 History</h3>
-                <ul id="player1-history" class="history-list"></ul>
+    <div class="game-shell">
+        <header class="top-bar">
+            <div class="brand">
+                <h1>FOE</h1>
+                <span class="tag">Fives · Odds · Evens</span>
             </div>
-            <div class="game-board-container">
-                <h1>TEO Game</h1>
-                <div id="game-board"></div>
-                <div id="status"></div>
-                <div id="combo-info"></div>
-                <div class="player-info">
-                    <div id="player1-info" class="player-box"></div>
-                    <div id="cpu1-info" class="player-box"></div>
+            <div class="top-actions">
+                <button id="mute-btn" class="icon-btn" type="button" aria-pressed="true">Sound on</button>
+                <button id="debug-btn" class="icon-btn" type="button" title="Toggle debug log (` )">Debug</button>
+                <button id="new-game-btn" class="ghost-btn" type="button">New game</button>
+            </div>
+        </header>
+
+        <section id="start-screen">
+            <div class="start-card">
+                <div class="logo-row">
+                    <div class="big">FOE</div>
+                    <p>Chain fives, odds, and evens. Outscore the CPU.</p>
                 </div>
+                <div class="records">
+                    <span>Wins <strong id="rec-wins">0</strong></span>
+                    <span>Losses <strong id="rec-losses">0</strong></span>
+                    <span>Best <strong id="rec-high">0</strong></span>
+                </div>
+                <div class="size-row">
+                    <button class="size-card" type="button" data-size="5">
+                        <b>5×5</b>
+                        <span>Quick duel</span>
+                    </button>
+                    <button class="size-card active" type="button" data-size="10">
+                        <b>10×10</b>
+                        <span>Classic board</span>
+                    </button>
+                </div>
+                <div class="rules">
+                    <div><i>1</i><span>Claim any starting tile. After that, grow by taking a tile that touches yours — diagonals count.</span></div>
+                    <div><i>2</i><span>Each claim peeks the hidden neighbors. Use that scout report on the side panels.</span></div>
+                    <div><i>3</i><span>Streaks of EVENS, ODDS, or FIVES (multiples of 5) raise your multiplier.</span></div>
+                    <div><i>4</i><span>Highest score when both sides are boxed in wins.</span></div>
+                </div>
+                <div class="start-actions">
+                    <button id="start-game" class="primary-btn" type="button">Start game</button>
+                </div>
+                <a class="mobile-link" href="FOE-MOBILE.html">Open the mobile version</a>
             </div>
-            <div class="history-container">
-                <h3>CPU History</h3>
-                <ul id="cpu1-history" class="history-list"></ul>
-            </div>
+        </section>
+
+        <section id="game-content">
+            <aside id="player-panel" class="side-panel player">
+                <div class="panel-head">
+                    <div class="avatar">YOU</div>
+                    <div>
+                        <h2>Player</h2>
+                        <p class="turn-tag" id="player-turn-tag">Your turn</p>
+                    </div>
+                </div>
+                <div class="score-block">
+                    <div id="player1-score" class="score-value">0</div>
+                    <div id="player1-multiplier" class="mult-badge">1.0x</div>
+                </div>
+                <div id="player-lead" class="lead-banner tied">Even match</div>
+                <div class="mix-pills">
+                    <div class="mix-pill even">EVEN <b id="player-mix-even">0</b></div>
+                    <div class="mix-pill odd">ODD <b id="player-mix-odd">0</b></div>
+                    <div class="mix-pill fives">FIVES <b id="player-mix-fives">0</b></div>
+                </div>
+                <div class="heat-pips" id="player-pips"></div>
+                <p id="player-flavor" class="flavor">Pick a seed tile and grow your chain.</p>
+                <div class="stat-grid">
+                    <div class="stat-chip"><span>Territory</span><b id="player-territory">0</b></div>
+                    <div class="stat-chip"><span>Heat</span><b id="player-heat">0</b></div>
+                    <div class="stat-chip"><span>Best combo</span><b id="player-best">0</b></div>
+                    <div class="stat-chip"><span>Last tile</span><b id="player-last">-</b></div>
+                </div>
+                <div class="combo-list">
+                    <div class="combo-row"><em>EVEN</em><div class="combo-track"><div id="player-even-bar" class="combo-fill even"></div></div><b id="player-even-count">0</b></div>
+                    <div class="combo-row"><em>ODD</em><div class="combo-track"><div id="player-odd-bar" class="combo-fill odd"></div></div><b id="player-odd-count">0</b></div>
+                    <div class="combo-row"><em>FIVES</em><div class="combo-track"><div id="player-fives-bar" class="combo-fill fives"></div></div><b id="player-fives-count">0</b></div>
+                </div>
+                <div class="scout-box">
+                    <h3>Scout report</h3>
+                    <div id="player-scout"></div>
+                </div>
+                <div class="history-wrap">
+                    <h3>Claim history</h3>
+                    <ul id="player1-history" class="history-list"></ul>
+                </div>
+            </aside>
+
+            <main class="board-column">
+                <div class="board-chrome" id="board-chrome">
+                    <div class="race-wrap">
+                        <span class="you">YOU</span>
+                        <div class="race" aria-hidden="true">
+                            <div id="race-player" class="race-player"></div>
+                            <div id="race-cpu" class="race-cpu"></div>
+                        </div>
+                        <span class="them">CPU</span>
+                    </div>
+                    <div class="status-row">
+                        <p id="status">Ready</p>
+                        <div class="meta-pills">
+                            <span id="tiles-pill" class="pill">100 open</span>
+                            <span id="moves-pill" class="pill">0 moves</span>
+                        </div>
+                    </div>
+                    <div id="peek-bar" class="peek-bar"><span></span></div>
+                </div>
+                <div class="board-stage" id="board-stage">
+                    <div id="game-board"></div>
+                    <div id="combo-callout"></div>
+                </div>
+            </main>
+
+            <aside id="cpu-panel" class="side-panel cpu">
+                <div class="panel-head">
+                    <div class="avatar">CPU</div>
+                    <div>
+                        <h2>CPU</h2>
+                        <p class="turn-tag" id="cpu-turn-tag">Idle</p>
+                    </div>
+                </div>
+                <div class="score-block">
+                    <div id="cpu1-score" class="score-value">0</div>
+                    <div id="cpu1-multiplier" class="mult-badge">1.0x</div>
+                </div>
+                <div id="cpu-lead" class="lead-banner tied">Even match</div>
+                <div class="mix-pills">
+                    <div class="mix-pill even">EVEN <b id="cpu-mix-even">0</b></div>
+                    <div class="mix-pill odd">ODD <b id="cpu-mix-odd">0</b></div>
+                    <div class="mix-pill fives">FIVES <b id="cpu-mix-fives">0</b></div>
+                </div>
+                <div class="heat-pips" id="cpu-pips"></div>
+                <p id="cpu-flavor" class="flavor">Scanning the board for a landing spot.</p>
+                <div class="stat-grid">
+                    <div class="stat-chip"><span>Territory</span><b id="cpu-territory">0</b></div>
+                    <div class="stat-chip"><span>Heat</span><b id="cpu-heat">0</b></div>
+                    <div class="stat-chip"><span>Best combo</span><b id="cpu-best">0</b></div>
+                    <div class="stat-chip"><span>Last tile</span><b id="cpu-last">-</b></div>
+                </div>
+                <div class="combo-list">
+                    <div class="combo-row"><em>EVEN</em><div class="combo-track"><div id="cpu-even-bar" class="combo-fill even"></div></div><b id="cpu-even-count">0</b></div>
+                    <div class="combo-row"><em>ODD</em><div class="combo-track"><div id="cpu-odd-bar" class="combo-fill odd"></div></div><b id="cpu-odd-count">0</b></div>
+                    <div class="combo-row"><em>FIVES</em><div class="combo-track"><div id="cpu-fives-bar" class="combo-fill fives"></div></div><b id="cpu-fives-count">0</b></div>
+                </div>
+                <div class="scout-box">
+                    <h3>Scout report</h3>
+                    <div id="cpu-scout"></div>
+                </div>
+                <div class="history-wrap">
+                    <h3>Claim history</h3>
+                    <ul id="cpu1-history" class="history-list"></ul>
+                </div>
+            </aside>
+        </section>
+    </div>
+
+    <canvas id="fx-canvas"></canvas>
+    <div id="fx-layer"></div>
+
+    <div id="end-modal" role="dialog" aria-modal="true" aria-labelledby="winner-text">
+        <div class="end-card">
+            <h2 id="winner-text">Game over</h2>
+            <p id="final-scores" class="final-score"></p>
+            <p id="high-note"></p>
+            <button id="play-again" class="primary-btn" type="button">Play again</button>
+            <div style="height:10px"></div>
+            <button id="end-menu" class="ghost-btn" type="button">Back to menu</button>
         </div>
     </div>
-    <script>
-        let GS = 10;
-        let TC = GS * GS;
-        const RT = 2000;
-        let gb = [], cp = 'PLAYER1', pc = {PLAYER1: [], CPU1: []}, sc = {PLAYER1: 0, CPU1: 0}, cb = {PLAYER1: [], CPU1: []}, sm = {PLAYER1: 1, CPU1: 1}, gp = 'START', ir = false;
 
-        document.getElementById('start-game').addEventListener('click', () => {
-            const gridSize = parseInt(document.getElementById('grid-size').value);
-            GS = gridSize;
-            TC = GS * GS;
-            document.getElementById('grid-size-selection').style.display = 'none';
-            document.getElementById('game-content').style.display = 'flex';
-            init();
-        });
+    <aside id="debug-panel" hidden>
+        <div class="debug-head">
+            <span>FOE debug log — copy this if something breaks</span>
+            <button id="debug-copy" class="icon-btn" type="button">Copy</button>
+        </div>
+        <pre id="debug-body"></pre>
+    </aside>
 
-        function init(){
-            const ge = document.getElementById('game-board');
-            ge.style.gridTemplateColumns = `repeat(${GS}, 30px)`;
-            ge.style.gridTemplateRows = `repeat(${GS}, 30px)`;
-            gb = Array.from({length: TC}, (_, i) => ({v: i + 1, r: false, o: null}));
-            for(let i = gb.length - 1; i > 0; i--){
-                const j = Math.floor(Math.random() * (i + 1));
-                [gb[i], gb[j]] = [gb[j], gb[i]];
-            }
-            ge.innerHTML = '';
-            gb.forEach((c, i) => {
-                const ce = document.createElement('div');
-                ce.classList.add('cell');
-                ce.dataset.index = i;
-                ce.style.width = `${30}px`;
-                ce.style.height = `${30}px`;
-                ce.addEventListener('click', () => handleCellClick(i));
-                ge.appendChild(ce);
-            });
-            updateStatus();
-            updatePlayerInfo();
-            highlightAvailableMoves();
-        }
-
-        function handleCellClick(i){
-            if(ir || cp !== 'PLAYER1') return;
-            if(gp === 'START' || isValidMove(i)) makeMove(i);
-        }
-
-        function makeMove(i){
-            if(gb[i].r) return;
-            gb[i].r = true;
-            gb[i].o = cp;
-            pc[cp].push(i);
-            const ce = document.querySelector(`.cell[data-index="${i}"]`);
-            ce.textContent = gb[i].v;
-            ce.classList.add(cp.toLowerCase());
-            updateCombo(gb[i].v);
-            updateScore();
-            updateHistory(gb[i].v);
-            revealSurroundingNumbers(i);
-        }
-
-        function revealSurroundingNumbers(i){
-            ir = true;
-            const si = getSurroundingIndices(i);
-            si.forEach(i => {
-                if(!gb[i].r){
-                    const c = document.querySelector(`.cell[data-index="${i}"]`);
-                    c.textContent = gb[i].v;
-                    c.classList.add('temp-revealed');
-                }
-            });
-            setTimeout(() => {
-                si.forEach(i => {
-                    if(!gb[i].r){
-                        const c = document.querySelector(`.cell[data-index="${i}"]`);
-                        c.textContent = '';
-                        c.classList.remove('temp-revealed');
-                    }
-                });
-                ir = false;
-                switchPlayer();
-            }, RT);
-        }
-
-        function switchPlayer(){
-            cp = cp === 'PLAYER1' ? 'CPU1' : 'PLAYER1';
-            if(gp === 'START' && pc['CPU1'].length === 1) gp = 'PLAY';
-            updateStatus();
-            updatePlayerInfo();
-            highlightAvailableMoves();
-            if(cp === 'CPU1'){
-                setTimeout(makeCPUMove, 500);
-            }
-        }
-
-        function isValidMove(i){
-            if(gb[i].r) return false;
-            return pc[cp].some(ci => getSurroundingIndices(ci).includes(i));
-        }
-
-        function updateCombo(v){
-            const ie = v % 2 === 0, if5 = v % 5 === 0;
-            let nc = [];
-            cb[cp].forEach(c => {
-                if((c.t === 'EVEN' && ie) || (c.t === 'ODD' && !ie)) nc.push({t: c.t, c: c.c + 1});
-                if(c.t === 'FIVES' && if5) nc.push({t: 'FIVES', c: c.c + 1});
-            });
-            if(nc.length === 0 || (if5 && !nc.some(c => c.t === 'FIVES'))){
-                if(if5) nc.push({t: 'FIVES', c: 1});
-                if(ie) nc.push({t: 'EVEN', c: 1});
-                else nc.push({t: 'ODD', c: 1});
-            }
-            cb[cp] = nc;
-            updateScoreMultiplier();
-        }
-
-        function updateScoreMultiplier(){
-            sm[cp] = 1 + cb[cp].reduce((t, c) => t + c.c * 0.1, 0);
-        }
-
-        function updateScore(){
-            sc[cp] += Math.round(sm[cp]);
-        }
-
-        function updateHistory(v){
-            const hl = document.getElementById(`${cp.toLowerCase()}-history`);
-            const li = document.createElement('li');
-            li.classList.add('history-item');
-            const ns = document.createElement('span');
-            ns.classList.add('number');
-            ns.textContent = v;
-            const cis = document.createElement('span');
-            cis.classList.add('combo-info');
-            cb[cp].forEach(c => {
-                const cb = document.createElement('span');
-                cb.classList.add('combo-badge', c.t.toLowerCase());
-                cb.textContent = `${c.c}x${c.t.charAt(0)}`;
-                cis.appendChild(cb);
-            });
-            li.appendChild(ns);
-            li.appendChild(cis);
-            hl.insertBefore(li, hl.firstChild);
-            if(hl.children.length > 10) hl.removeChild(hl.lastChild);
-        }
-
-        function getSurroundingIndices(i){
-            const r = Math.floor(i / GS), c = i % GS;
-            return [i - GS - 1, i - GS, i - GS + 1, i - 1, i + 1, i + GS - 1, i + GS, i + GS + 1].filter((i, idx) => {
-                const r2 = Math.floor(i / GS), c2 = i % GS;
-                return r2 >= 0 && r2 < GS && c2 >= 0 && c2 < GS && Math.abs(r2 - r) <= 1 && Math.abs(c2 - c) <= 1;
-            });
-        }
-
-        function highlightAvailableMoves(){
-            document.querySelectorAll('.cell').forEach(c => c.classList.remove('available'));
-            if(gp === 'START'){
-                document.querySelectorAll('.cell:not(.player1):not(.cpu1)').forEach(c => c.classList.add('available'));
-            } else {
-                pc[cp].forEach(ci => {
-                    getSurroundingIndices(ci).forEach(i => {
-                        if(!gb[i].r) document.querySelector(`.cell[data-index="${i}"]`).classList.add('available');
-                    });
-                });
-            }
-        }
-
-        function makeCPUMove(){
-            let am = [];
-            if(gp === 'START'){
-                am = gb.map((c, i) => i).filter(i => !gb[i].r);
-            } else {
-                pc['CPU1'].forEach(ci => {
-                    getSurroundingIndices(ci).forEach(i => {
-                        if(!gb[i].r) am.push(i);
-                    });
-                });
-            }
-            if(am.length > 0){
-                const rm = am[Math.floor(Math.random() * am.length)];
-                makeMove(rm);
-            } else {
-                endGame();
-            }
-        }
-
-        function updatePlayerInfo(){
-            ['PLAYER1', 'CPU1'].forEach(p => {
-                const ie = document.getElementById(`${p.toLowerCase()}-info`);
-                ie.textContent = `${p} - Score: ${sc[p]}, Multiplier: ${sm[p].toFixed(1)}x`;
-            });
-            document.getElementById('player1-info').classList.toggle('active', cp === 'PLAYER1');
-            document.getElementById('cpu1-info').classList.toggle('active', cp === 'CPU1');
-        }
-
-        function updateStatus(){
-            const se = document.getElementById('status');
-            se.textContent = gp === 'START' ? `${cp}: Choose your starting point` : `Current turn: ${cp}`;
-        }
-
-        function endGame(){
-            const winner = sc.PLAYER1 > sc.CPU1 ? 'PLAYER1' : 'CPU1';
-            alert(`Game Over! ${winner} wins with a score of ${sc[winner]}!`);
-        }
-
-    </script>
+    <script src="js/foe-debug.js"></script>
+    <script src="js/foe-audio.js"></script>
+    <script src="js/foe-fx.js"></script>
+    <script src="js/foe-game.js"></script>
 </body>
 </html>
