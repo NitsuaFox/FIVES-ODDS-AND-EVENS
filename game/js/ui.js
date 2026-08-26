@@ -9,6 +9,9 @@ import {
   PLAYER_LABELS,
   METER_MAX,
   HISTORY_LIMIT,
+  GAME_VERSION,
+  STUDIO_NAME,
+  STUDIO_URL,
 } from './config.js';
 import { createLogger } from './debug.js';
 
@@ -50,14 +53,57 @@ export class UI {
       resultTitle: $('result-title'),
       resultYou: $('result-you'),
       resultCpu: $('result-cpu'),
+      menuCredit: $('menu-credit'),
+      menuStudio: $('menu-studio'),
+      menuVersion: $('menu-version'),
     };
 
     this._buildSetupOptions();
     this._bindOverlayButtons();
+    this._renderMenuCredit();
     log.log('UI ready');
     // Log menu title/subtitle centers after first layout so alignment
     // issues can be copy-pasted from the console.
     requestAnimationFrame(() => this.logMenuAlignment());
+  }
+
+  /* ---------------- main-menu credit ---------------- */
+
+  _renderMenuCredit() {
+    const { menuCredit, menuStudio, menuVersion } = this.el;
+    if (!menuCredit || !menuVersion) {
+      log.warn('menu credit missing', {
+        hasCredit: !!menuCredit,
+        hasVersion: !!menuVersion,
+        hasStudio: !!menuStudio,
+      });
+      return;
+    }
+
+    const versionLabel = `v${GAME_VERSION}`;
+    menuVersion.textContent = versionLabel;
+    menuCredit.dataset.version = GAME_VERSION;
+    menuCredit.dataset.studio = STUDIO_NAME;
+
+    if (menuStudio) {
+      menuStudio.href = STUDIO_URL;
+      menuStudio.textContent = STUDIO_NAME;
+      menuStudio.addEventListener('click', () => {
+        log.log('studio credit clicked', {
+          studio: STUDIO_NAME,
+          url: STUDIO_URL,
+          version: GAME_VERSION,
+        });
+      });
+    }
+
+    // Copy-paste friendly line for troubleshooting from the console.
+    log.log('menu credit rendered', {
+      studio: STUDIO_NAME,
+      version: GAME_VERSION,
+      url: STUDIO_URL,
+      text: `developed by ${STUDIO_NAME} ${versionLabel}`,
+    });
   }
 
   /* ---------------- screens & overlays ---------------- */
@@ -69,6 +115,12 @@ export class UI {
     });
     if (name === 'menu') {
       requestAnimationFrame(() => this.logMenuAlignment());
+      if (this.el.menuCredit) {
+        log.log('menu credit visible', {
+          text: this.el.menuCredit.innerText.replace(/\s+/g, ' ').trim(),
+          version: this.el.menuCredit.dataset.version,
+        });
+      }
     }
   }
 
