@@ -42,6 +42,7 @@ async function boot() {
     studioUrl: STUDIO_URL,
     setDebug,
     toggleDebug,
+    logMenuAlignment: () => ui.logMenuAlignment(),
     get game() {
       return ui.game;
     },
@@ -54,9 +55,27 @@ async function boot() {
   };
 
   /* ---- menu ---- */
-  on('menu-play', 'click', () => ui.showScreen('setup'));
-  on('menu-howto', 'click', () => ui.showOverlay('howto'));
+  on('menu-play', 'click', () => {
+    log.log('menu-play click');
+    ui.showScreen('setup');
+  });
+  on('menu-howto', 'click', () => {
+    log.log('menu-howto click');
+    ui.showOverlay('howto');
+  });
   on('menu-online', 'click', () => log.log('online mode is locked'));
+
+  logMenuButtonStyles();
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready
+      .then(() => {
+        log.log('webfonts ready', {
+          families: [...document.fonts].map((f) => `${f.family} ${f.weight}`).slice(0, 12),
+        });
+        logMenuButtonStyles();
+      })
+      .catch((err) => log.warn('webfonts failed', err));
+  }
 
   /* ---- setup ---- */
   on('setup-back', 'click', () => ui.showScreen('menu'));
@@ -88,7 +107,34 @@ async function boot() {
     }
   });
 
+  window.addEventListener('resize', () => {
+    if (ui.el.screens.menu.classList.contains('is-active')) {
+      ui.logMenuAlignment();
+    }
+  });
+
   log.log('ready');
+}
+
+function logMenuButtonStyles() {
+  const ids = ['menu-play', 'menu-online', 'menu-howto'];
+  const snapshot = ids.map((id) => {
+    const el = document.getElementById(id);
+    if (!el) return { id, missing: true };
+    const cs = getComputedStyle(el);
+    const label = el.querySelector('.btn__label');
+    const labelCs = label ? getComputedStyle(label) : null;
+    return {
+      id,
+      fontFamily: cs.fontFamily,
+      textAlign: cs.textAlign,
+      justifyContent: cs.justifyContent,
+      alignItems: cs.alignItems,
+      labelFont: labelCs ? `${labelCs.fontWeight} ${labelCs.fontSize} ${labelCs.fontFamily}` : null,
+      labelAlign: labelCs ? labelCs.textAlign : null,
+    };
+  });
+  log.log('menu button styles', snapshot);
 }
 
 if (document.readyState === 'loading') {

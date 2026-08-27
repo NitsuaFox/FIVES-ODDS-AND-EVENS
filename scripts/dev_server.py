@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """Local development server for the FIVES, ODD'S & EVEN'S (FOE) static site.
 
-The project is a static site (plain HTML/CSS/JS) that is deployed to GitHub
-Pages via Jekyll. For local development we don't need Jekyll -- the pages have
-no Liquid/front matter -- so a plain static file server over the repository
-root is enough to open and play the games.
+The project is a static site (plain HTML/CSS/JS) that is deployed to Wavedash
+from ./game. For local development a plain static file server over the
+repository root is enough to open and play the game.
 
 Debug logging is enabled by default so that any request/startup issue can be
 copy-pasted back for troubleshooting. Disable it with FOE_DEBUG=0.
@@ -55,10 +54,8 @@ def main() -> int:
         return 1
 
     log.info("FOE dev server ready")
-    log.info("New 16:9 game: http://localhost:%s/game/", port)
-    log.info("Desktop game:  http://localhost:%s/FOE.html", port)
-    log.info("Mobile game:   http://localhost:%s/FOE-MOBILE.html", port)
-    log.info("Directory idx: http://localhost:%s/", port)
+    log.info("Play FOE: http://localhost:%s/game/", port)
+    log.info("Root:     http://localhost:%s/", port)
 
     try:
         httpd.serve_forever()

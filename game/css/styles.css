@@ -28,7 +28,8 @@
   --card-2: rgba(255, 255, 255, 0.07);
   --stroke: rgba(255, 255, 255, 0.11);
 
-  --font: 'Inter', 'Segoe UI', system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+  --font: 'Outfit', 'Segoe UI', system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+  --font-display: 'Outfit', 'Segoe UI', system-ui, sans-serif;
 }
 
 * {
@@ -97,6 +98,8 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  text-align: center;
   gap: 0.3cqh;
   transition: transform 0.15s ease, background 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   backdrop-filter: blur(6px);
@@ -112,6 +115,14 @@ body {
   transform: translateY(0);
 }
 
+.btn__label,
+.btn__sub {
+  display: block;
+  width: 100%;
+  text-align: center;
+  line-height: 1.15;
+}
+
 .btn__label {
   font-size: 2.6cqh;
   font-weight: 700;
@@ -120,7 +131,21 @@ body {
 
 .btn__sub {
   font-size: 1.5cqh;
+  font-weight: 500;
   color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+.btn__headline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7cqw;
+  width: 100%;
+}
+
+.btn__headline .btn__label {
+  width: auto;
 }
 
 .btn--primary {
@@ -169,6 +194,16 @@ body {
   text-align: center;
 }
 
+/* Title + subtitle share one center axis. Without this, .brand is a
+   shrink-wrapped block sized by the wider tagline, and the FOE letters
+   (a left-packed flex row) sit left of the subtitle. */
+.brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
 .brand__title {
   margin: 0;
   font-size: 16cqh;
@@ -176,6 +211,7 @@ body {
   letter-spacing: 0.06em;
   line-height: 0.9;
   display: flex;
+  justify-content: center;
   gap: 1cqw;
   filter: drop-shadow(0 1.2cqh 3cqh rgba(0, 0, 0, 0.5));
 }
@@ -191,11 +227,18 @@ body {
 }
 
 .brand__tag {
+  /* Extra left padding matches trailing letter-spacing so the
+     visible glyphs share the title's center axis. Keep the tag on
+     one line so it can be wider than FOE without wrapping. */
   margin: 1cqh 0 0;
+  padding-left: 0.35em;
   font-size: 2.6cqh;
   letter-spacing: 0.35em;
   text-transform: uppercase;
   color: var(--muted);
+  text-align: center;
+  width: max-content;
+  white-space: nowrap;
 }
 
 .menu__buttons {
@@ -206,12 +249,31 @@ body {
 
 .menu__buttons .btn {
   min-width: 22cqw;
+  font-family: var(--font-display);
+  align-items: stretch;
+  justify-content: center;
+  text-align: center;
+  padding: 2.2cqh 1.6cqw;
+}
+
+.menu__buttons .btn__label {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  line-height: 1.05;
+}
+
+.menu__buttons .btn__sub {
+  font-family: var(--font);
+  letter-spacing: 0.08em;
 }
 
 .menu__hint {
   font-size: 1.8cqh;
   color: var(--muted);
   max-width: 60cqw;
+  text-align: center;
+  align-self: center;
 }
 
 /* Studio credit pinned to the bottom of the main menu (does not shift the centered stack). */
