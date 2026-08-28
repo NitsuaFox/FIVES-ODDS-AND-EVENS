@@ -14,6 +14,7 @@ import {
   STUDIO_URL,
 } from './config.js';
 import { createLogger } from './debug.js';
+import { logHudLayout } from './stage.js';
 
 const log = createLogger('ui');
 
@@ -237,6 +238,9 @@ export class UI {
 
     this.game = new Game({ size, difficulty, delegate: this._delegate() });
     this.game.start();
+    requestAnimationFrame(() => {
+      logHudLayout();
+    });
     log.groupEnd();
   }
 

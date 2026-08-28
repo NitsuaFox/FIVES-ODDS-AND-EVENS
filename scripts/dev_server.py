@@ -39,6 +39,12 @@ log = logging.getLogger("foe.dev_server")
 class DebugRequestHandler(SimpleHTTPRequestHandler):
     """Static handler that logs every request for easy troubleshooting."""
 
+    def end_headers(self) -> None:
+        # Local iteration: never let the browser keep a stale HUD/CSS/JS copy.
+        self.send_header('Cache-Control', 'no-store, no-cache, must-revalidate')
+        self.send_header('Pragma', 'no-cache')
+        super().end_headers()
+
     def log_message(self, fmt: str, *args) -> None:  # noqa: A003 - stdlib name
         log.debug("request from %s: %s", self.address_string(), fmt % args)
 

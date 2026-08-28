@@ -4,6 +4,7 @@ import { UI } from './ui.js';
 import { toggleDebug, setDebug, isDebug, createLogger } from './debug.js';
 import { initWavedash, toggleOverlay, hasSDK } from './wavedash.js';
 import { GAME_VERSION, STUDIO_NAME, STUDIO_URL } from './config.js';
+import { initStage, fitStage, logHudLayout, DESIGN_WIDTH, DESIGN_HEIGHT } from './stage.js';
 
 const log = createLogger('main');
 
@@ -29,6 +30,7 @@ async function boot() {
     studio: STUDIO_NAME,
   });
   await maybeInstallMock();
+  initStage();
   const ui = new UI();
 
   // Reveal the game on the Wavedash platform (no-op when standalone).
@@ -40,8 +42,11 @@ async function boot() {
     version: GAME_VERSION,
     studio: STUDIO_NAME,
     studioUrl: STUDIO_URL,
+    design: { w: DESIGN_WIDTH, h: DESIGN_HEIGHT, ratio: '16:9' },
     setDebug,
     toggleDebug,
+    fitStage,
+    logHudLayout,
     logMenuAlignment: () => ui.logMenuAlignment(),
     get game() {
       return ui.game;
@@ -110,6 +115,9 @@ async function boot() {
   window.addEventListener('resize', () => {
     if (ui.el.screens.menu.classList.contains('is-active')) {
       ui.logMenuAlignment();
+    }
+    if (ui.el.screens.game.classList.contains('is-active')) {
+      logHudLayout();
     }
   });
 
