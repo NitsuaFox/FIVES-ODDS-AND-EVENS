@@ -12,6 +12,23 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./css/styles.css" />
+    <script>
+      /* First-paint 16:9 scale so the 1920×1080 stage is never shown unscaled.
+         game/js/stage.js takes over on boot / resize. */
+      (function () {
+        var w = 1920;
+        var h = 1080;
+        var vw = window.innerWidth;
+        var vh = window.innerHeight;
+        var s = Math.min(vw / w, vh / h);
+        document.documentElement.style.setProperty('--stage-scale', String(s));
+        console.log('[FOE:stage]', new Date().toLocaleTimeString('en-GB', { hour12: false }), 'first-paint scale', {
+          viewport: { w: vw, h: vh },
+          design: '1920x1080',
+          scale: +s.toFixed(4),
+        });
+      })();
+    </script>
   </head>
   <body>
     <!-- Fixed 16:9 stage; everything scales with it. -->
