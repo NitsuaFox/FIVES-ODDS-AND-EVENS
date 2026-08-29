@@ -2,10 +2,10 @@
 # Docs: https://docs.wavedash.com/cli/configuration
 #
 # game_id     -> the Wavedash project this repo uploads to.
-# upload_dir  -> folder containing the game's index.html (our 16:9 game lives in ./game).
+# upload_dir  -> Vite's production output. Run `npm run build` before upload.
 #
 # Auth is provided separately (never commit tokens). Locally the CLI reads
 # credentials from `wavedash auth login`; in CI set the WAVEDASH_TOKEN env var.
 
 game_id = "j97ae99cw8911f8p618t5xhb8h8d6ppv"
-upload_dir = "./game"
+upload_dir = "./dist"
