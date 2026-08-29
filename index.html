@@ -1,16 +1,300 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#071018" />
+    <meta name="description" content="FOE — a competitive memory and territory duel built around fives, odds and evens." />
     <title>FOE — Fives · Odds · Evens</title>
-    <meta http-equiv="refresh" content="0; url=./game/" />
-    <link rel="canonical" href="./game/" />
-    <script>
-      location.replace('./game/');
-    </script>
   </head>
   <body>
-    <p><a href="./game/">Play FOE</a></p>
+    <canvas id="ambient-canvas" class="ambient-canvas" aria-hidden="true"></canvas>
+    <div class="world-glow world-glow--cyan" aria-hidden="true"></div>
+    <div class="world-glow world-glow--violet" aria-hidden="true"></div>
+
+    <main id="stage" class="stage">
+      <div class="stage__grid" aria-hidden="true"></div>
+      <div class="system-controls" aria-label="Game controls">
+        <button id="system-sound" class="system-button" type="button" aria-label="Mute sound" title="Sound">
+          <svg class="system-button__icon sound-on" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 9v6h4l5 4V5L8 9H4Z" />
+            <path d="M16 8.2a5 5 0 0 1 0 7.6M18.8 5.5a9 9 0 0 1 0 13" />
+          </svg>
+          <svg class="system-button__icon sound-off" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 9v6h4l5 4V5L8 9H4Z" />
+            <path d="m17 9 4 4m0-4-4 4" />
+          </svg>
+        </button>
+        <button id="system-fullscreen" class="system-button" type="button" aria-label="Toggle fullscreen" title="Fullscreen (F)">
+          <svg class="system-button__icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M8 3H3v5M16 3h5v5M8 21H3v-5m13 5h5v-5" />
+          </svg>
+        </button>
+      </div>
+
+      <section id="screen-menu" class="screen screen--menu is-active" aria-labelledby="brand-title">
+        <div class="menu-layout">
+          <div class="menu-copy">
+            <div class="eyebrow"><span class="eyebrow__pulse"></span> Memory territory / match 03</div>
+            <div class="brand-lockup">
+              <div class="brand-mark" aria-hidden="true">
+                <span class="brand-mark__ring brand-mark__ring--outer"></span>
+                <span class="brand-mark__ring brand-mark__ring--inner"></span>
+                <span class="brand-mark__five">5</span>
+              </div>
+              <div>
+                <h1 class="brand-title" id="brand-title">
+                  <span class="brand-title__f">F</span><span class="brand-title__o">O</span><span class="brand-title__e">E</span>
+                </h1>
+                <p class="brand-subtitle">Fives · Odds · Evens</p>
+              </div>
+            </div>
+            <h2 class="menu-headline">Read the grid.<br /><span>Own the signal.</span></h2>
+            <p class="menu-description">
+              A three-round duel of memory, territory and escalating combos. Every number you remember can change the match.
+            </p>
+            <div class="feature-pills" aria-label="Game features">
+              <span><b>3</b> rounds</span>
+              <span><b>2</b> private memories</span>
+              <span><b>1</b> shared grid</span>
+            </div>
+          </div>
+
+          <nav class="menu-actions" aria-label="Main menu">
+            <button class="action-card action-card--primary" id="menu-play" type="button">
+              <span class="action-card__index">01</span>
+              <span class="action-card__body">
+                <span class="action-card__title">Start match</span>
+                <span class="action-card__sub">Fair 3-round duel vs CPU</span>
+              </span>
+              <span class="action-card__arrow" aria-hidden="true">↗</span>
+            </button>
+            <button class="action-card" id="menu-howto" type="button">
+              <span class="action-card__index">02</span>
+              <span class="action-card__body">
+                <span class="action-card__title">How to play</span>
+                <span class="action-card__sub">Rules, chains and private peeks</span>
+              </span>
+              <span class="action-card__arrow" aria-hidden="true">→</span>
+            </button>
+            <button class="action-card action-card--locked" id="menu-online" type="button" disabled aria-disabled="true">
+              <span class="action-card__index">03</span>
+              <span class="action-card__body">
+                <span class="action-card__title">Online duel</span>
+                <span class="action-card__sub">Network mode in development</span>
+              </span>
+              <span class="action-card__lock" aria-hidden="true">Locked</span>
+            </button>
+            <p class="menu-audio-note"><span class="wave-mini" aria-hidden="true"></span> Procedural soundscape enabled</p>
+          </nav>
+        </div>
+
+        <footer class="menu-footer" id="menu-credit">
+          <span>FOE // build <b id="menu-version">0.3.0</b></span>
+          <span class="menu-footer__line"></span>
+          <span>crafted by <a id="menu-studio" href="https://w2d.games" target="_blank" rel="noreferrer">w2d.games</a></span>
+        </footer>
+      </section>
+
+      <section id="screen-setup" class="screen screen--setup" aria-labelledby="setup-title">
+        <div class="setup-shell">
+          <header class="setup-header">
+            <button class="back-button" id="setup-back" type="button" aria-label="Back to menu">←</button>
+            <div>
+              <p class="section-kicker">Configure duel</p>
+              <h2 id="setup-title">Build your match</h2>
+            </div>
+            <div class="round-badge"><span>Format</span><b>Best total / 3</b></div>
+          </header>
+
+          <div class="setup-grid">
+            <fieldset class="setup-group">
+              <legend><span>01</span> Grid scale</legend>
+              <div class="option-grid" id="size-options"></div>
+            </fieldset>
+            <fieldset class="setup-group">
+              <legend><span>02</span> CPU profile</legend>
+              <div class="option-grid" id="difficulty-options"></div>
+            </fieldset>
+          </div>
+
+          <div class="fairness-rail" aria-label="Fair match rules">
+            <div><span class="fairness-rail__icon">◇</span><b>Hidden starts</b><small>Both commit blind</small></div>
+            <div><span class="fairness-rail__icon">◌</span><b>Private peeks</b><small>No information leaks</small></div>
+            <div><span class="fairness-rail__icon">↔</span><b>Equal claims</b><small>Exactly half each</small></div>
+            <div><span class="fairness-rail__icon">⟳</span><b>Alternating opener</b><small>Randomized round one</small></div>
+          </div>
+
+          <button class="launch-button" id="setup-start" type="button">
+            <span><small>Ready when you are</small><b>Enter the grid</b></span>
+            <span class="launch-button__disc" aria-hidden="true">▶</span>
+          </button>
+        </div>
+      </section>
+
+      <section id="screen-game" class="screen screen--game" aria-label="FOE match">
+        <header class="game-topbar">
+          <button class="game-menu-button" id="game-menu" type="button" aria-label="Pause menu">
+            <span></span><span></span>
+          </button>
+          <div class="round-progress">
+            <span class="round-progress__label">Match sequence</span>
+            <div class="round-pips" id="round-pips" aria-label="Round progress">
+              <span></span><span></span><span></span>
+            </div>
+          </div>
+          <div class="turn-display" id="turn-indicator">
+            <span class="turn-display__signal"></span>
+            <b>Your move</b>
+          </div>
+          <div class="phase-display" id="phase-indicator">Round 1 / 3</div>
+        </header>
+
+        <div class="arena">
+          <aside class="player-card player-card--you" id="panel-you">
+            <header class="player-card__header">
+              <span class="player-avatar">Y</span>
+              <span><small>Signal blue</small><b>You</b></span>
+              <span class="live-dot"></span>
+            </header>
+            <div class="score-block">
+              <span class="score-block__label">Round score</span>
+              <strong id="score-you">0</strong>
+              <div class="match-total">Match total <b id="match-you">0</b></div>
+            </div>
+            <div class="combo-readout">
+              <span>Active multiplier</span>
+              <strong><span id="mult-you">1.0</span><small>×</small></strong>
+            </div>
+            <div class="claims-readout" id="claims-you">0 / 0 claimed</div>
+            <div class="meters" id="meters-you">
+              <div class="meter meter--odd"><span class="meter__key">O</span><div class="meter__body"><small>Odd chain</small><div class="meter__track"><span class="meter__fill" data-kind="odd"></span></div></div></div>
+              <div class="meter meter--even"><span class="meter__key">E</span><div class="meter__body"><small>Even chain</small><div class="meter__track"><span class="meter__fill" data-kind="even"></span></div></div></div>
+              <div class="meter meter--five"><span class="meter__key">5</span><div class="meter__body"><small>Five chain</small><div class="meter__track"><span class="meter__fill" data-kind="five"></span></div></div></div>
+            </div>
+            <div class="history-wrap"><span>Recent captures</span><div class="history" id="history-you"></div></div>
+          </aside>
+
+          <div class="board-column">
+            <div class="board-meta">
+              <span><i class="legend-dot legend-dot--you"></i>Your territory</span>
+              <span><i class="legend-dot legend-dot--peek"></i>Private peek</span>
+              <span><i class="legend-dot legend-dot--cpu"></i>CPU territory</span>
+            </div>
+            <div class="board-frame">
+              <span class="board-frame__corner board-frame__corner--tl"></span>
+              <span class="board-frame__corner board-frame__corner--tr"></span>
+              <span class="board-frame__corner board-frame__corner--bl"></span>
+              <span class="board-frame__corner board-frame__corner--br"></span>
+              <div id="board" class="board" role="grid" aria-label="Game board"></div>
+            </div>
+          </div>
+
+          <aside class="player-card player-card--cpu" id="panel-cpu">
+            <header class="player-card__header">
+              <span class="player-avatar">C</span>
+              <span><small>Signal coral</small><b>CPU</b></span>
+              <span class="cpu-thinking" aria-label="CPU status"><i></i><i></i><i></i></span>
+            </header>
+            <div class="score-block">
+              <span class="score-block__label">Round score</span>
+              <strong id="score-cpu">0</strong>
+              <div class="match-total">Match total <b id="match-cpu">0</b></div>
+            </div>
+            <div class="combo-readout">
+              <span>Active multiplier</span>
+              <strong><span id="mult-cpu">1.0</span><small>×</small></strong>
+            </div>
+            <div class="claims-readout" id="claims-cpu">0 / 0 claimed</div>
+            <div class="meters" id="meters-cpu">
+              <div class="meter meter--odd"><span class="meter__key">O</span><div class="meter__body"><small>Odd chain</small><div class="meter__track"><span class="meter__fill" data-kind="odd"></span></div></div></div>
+              <div class="meter meter--even"><span class="meter__key">E</span><div class="meter__body"><small>Even chain</small><div class="meter__track"><span class="meter__fill" data-kind="even"></span></div></div></div>
+              <div class="meter meter--five"><span class="meter__key">5</span><div class="meter__body"><small>Five chain</small><div class="meter__track"><span class="meter__fill" data-kind="five"></span></div></div></div>
+            </div>
+            <div class="history-wrap"><span>Recent captures</span><div class="history" id="history-cpu"></div></div>
+          </aside>
+        </div>
+
+        <footer class="status-dock">
+          <span class="status-dock__glyph">⌁</span>
+          <span id="statusbar">Choose your hidden starting tile</span>
+          <span class="status-dock__hint">F · fullscreen</span>
+        </footer>
+      </section>
+
+      <div id="overlay-howto" class="overlay" role="dialog" aria-modal="true" aria-labelledby="howto-title">
+        <div class="overlay-card overlay-card--rules">
+          <header class="overlay-card__header">
+            <div><p class="section-kicker">Field manual</p><h2 id="howto-title">How the signal works</h2></div>
+            <button class="close-button" id="howto-close" type="button" aria-label="Close rules">×</button>
+          </header>
+          <div class="rules-grid">
+            <article><span>01</span><div><b>Commit blind</b><p>You and the CPU choose hidden starts, then reveal together.</p></div></article>
+            <article><span>02</span><div><b>Grow territory</b><p>Claim any free tile touching yours, diagonals included.</p></div></article>
+            <article><span>03</span><div><b>Read private peeks</b><p>Neighbours flash only for you. Remember them before they fade.</p></div></article>
+            <article><span>04</span><div><b>Chain parity</b><p>Consecutive odds or evens add +0.1× per extra matching tile.</p></div></article>
+            <article><span>05</span><div><b>Hunt fives</b><p>Multiples of five add +0.3×, stacking up to three times.</p></div></article>
+            <article><span>06</span><div><b>Win the match</b><p>Both sides claim equal tiles. Highest total after three rounds wins.</p></div></article>
+          </div>
+          <div class="rules-legend">
+            <span><i class="number-chip number-chip--odd">7</i> odd</span>
+            <span><i class="number-chip number-chip--even">8</i> even</span>
+            <span><i class="number-chip number-chip--five">15</i> multiple of five</span>
+          </div>
+          <button class="text-button" id="howto-confirm" type="button">I understand · enter setup</button>
+        </div>
+      </div>
+
+      <div id="overlay-pause" class="overlay" role="dialog" aria-modal="true" aria-labelledby="pause-title">
+        <div class="overlay-card overlay-card--compact">
+          <div class="pause-symbol" aria-hidden="true"><i></i><i></i></div>
+          <p class="section-kicker">Signal suspended</p>
+          <h2 id="pause-title">Match paused</h2>
+          <p>Timers and private peek windows are frozen.</p>
+          <div class="overlay-actions">
+            <button class="text-button text-button--primary" id="pause-resume" type="button">Resume match</button>
+            <button class="text-button" id="pause-quit" type="button">Leave to menu</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="overlay-roundover" class="overlay" role="dialog" aria-modal="true" aria-labelledby="round-title">
+        <div class="overlay-card overlay-card--result">
+          <p class="section-kicker" id="round-summary">Round 1 of 3</p>
+          <h2 id="round-title">Round complete</h2>
+          <div class="result-scores">
+            <div class="result-score result-score--you"><small>You</small><strong id="round-you">0</strong></div>
+            <span class="result-versus">/</span>
+            <div class="result-score result-score--cpu"><small>CPU</small><strong id="round-cpu">0</strong></div>
+          </div>
+          <p class="result-total" id="round-total">Match total 0—0</p>
+          <div class="overlay-actions">
+            <button class="text-button text-button--primary" id="round-next" type="button">Start next round</button>
+            <button class="text-button" id="round-menu" type="button">Leave to menu</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="overlay-gameover" class="overlay" role="dialog" aria-modal="true" aria-labelledby="result-title">
+        <div class="overlay-card overlay-card--result overlay-card--final">
+          <div class="result-emblem" id="result-emblem" aria-hidden="true">◇</div>
+          <p class="section-kicker">Three-round total</p>
+          <h2 id="result-title">Match complete</h2>
+          <div class="result-scores">
+            <div class="result-score result-score--you"><small>You</small><strong id="result-you">0</strong></div>
+            <span class="result-versus">/</span>
+            <div class="result-score result-score--cpu"><small>CPU</small><strong id="result-cpu">0</strong></div>
+          </div>
+          <div class="overlay-actions">
+            <button class="text-button text-button--primary" id="result-again" type="button">Run it back</button>
+            <button class="text-button" id="result-menu" type="button">Main menu</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    </main>
+
+    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
